@@ -5,3 +5,6 @@
 Navigate to the /KEBABAPIPANEL folder and execute this command in the command prompt:
 
 docker-compose up
+
+To stop
+docker-compose stop
