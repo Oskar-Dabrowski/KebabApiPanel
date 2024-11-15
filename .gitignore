@@ -53,3 +53,6 @@ var/
 *.mo
 **/__pycache__
 *.swp
+
+KEBABAPIPANEL/db.sqlite3
+
