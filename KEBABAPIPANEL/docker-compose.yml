@@ -10,6 +10,7 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - redis
 
   db:
     image: postgres:13
@@ -19,6 +20,36 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: db_name
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  celery:
+    build:
+      context: .
+    container_name: celery
+    command: celery -A KEBABAPIPANEL worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - db
+      - web
+
+  celery-beat:
+    build:
+      context: .
+    container_name: celery-beat
+    command: celery -A KEBABAPIPANEL beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - db
+      - web
 
 volumes:
   postgres_data:
