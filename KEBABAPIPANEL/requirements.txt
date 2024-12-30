@@ -1,17 +1,24 @@
 alembic==1.13.1
+amqp==5.3.1
 asgiref==3.8.1
 asttokens==2.4.1
 atomicwrites==1.4.1
 attrs==23.2.0
 beautifulsoup4==4.12.3
+billiard==4.2.1
 blinker==1.7.0
+celery==5.4.0
 certifi==2024.2.2
 chardet==4.0.0
 charset-normalizer==3.3.2
 click==8.1.7
+click-didyoumean==0.3.1
+click-plugins==1.1.1
+click-repl==0.3.0
 colorama==0.4.6
 comm==0.2.2
 contourpy==1.2.1
+cron-descriptor==1.4.5
 cycler==0.12.1
 debugpy==1.8.1
 decorator==5.1.1
@@ -20,6 +27,8 @@ distlib==0.3.8
 Django==4.2.5
 django-bootstrap-icons==0.8.7
 django-bootstrap-v5==1.0.11
+django-celery-beat==2.7.0
+django-timezone-field==7.0
 djangorestframework==3.15.2
 djangorestframework-simplejwt==5.3.1
 drf-spectacular==0.27.2
@@ -51,6 +60,7 @@ jupyter_client==8.6.1
 jupyter_core==5.7.2
 jupyterlab_widgets==3.0.10
 kiwisolver==1.4.5
+kombu==5.4.2
 Mako==1.3.3
 MarkupSafe==2.1.5
 matplotlib==3.8.4
@@ -71,11 +81,12 @@ PyJWT==2.8.0
 pyparsing==3.1.2
 pytest==8.2.0
 pytest-flask==1.3.0
+python-crontab==3.2.0
 python-dateutil==2.9.0.post0
 pytz==2024.2
-pywin32==306; platform_system == "Windows"
 PyYAML==6.0.2
 pyzmq==26.0.3
+redis==5.2.1
 referencing==0.35.1
 requests==2.31.0
 rpds-py==0.21.0
@@ -94,6 +105,7 @@ tzdata==2024.1
 uritemplate==4.1.1
 urllib3==2.2.1
 uvicorn==0.29.0
+vine==5.1.0
 virtualenv==20.25.1
 wcwidth==0.2.13
 Werkzeug==3.0.1
