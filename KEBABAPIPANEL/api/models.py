@@ -16,6 +16,7 @@ class Kebab(models.Model):
     craft_rating = models.BooleanField(default=False)
     order_methods = models.TextField(blank=True, null=True)
     location_details = models.TextField(blank=True, null=True)
+    social_links = models.JSONField(blank=True, null=True)
 
     def __str__(self):
         return self.name
