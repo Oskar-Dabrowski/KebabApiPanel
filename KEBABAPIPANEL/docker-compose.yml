@@ -11,6 +11,8 @@ services:
     depends_on:
       - db
       - redis
+    environment:
+      - DJANGO_SETTINGS_MODULE=KEBABAPIPANEL.settings
 
   db:
     image: postgres:13
@@ -38,6 +40,8 @@ services:
       - redis
       - db
       - web
+    environment:
+      - DJANGO_SETTINGS_MODULE=KEBABAPIPANEL.settings
 
   celery-beat:
     build:
@@ -50,6 +54,8 @@ services:
       - redis
       - db
       - web
+    environment:
+      - DJANGO_SETTINGS_MODULE=KEBABAPIPANEL.settings
 
 volumes:
   postgres_data:
