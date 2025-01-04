@@ -1,6 +1,9 @@
 # Wybieramy bazowy obraz z Pythonem
 FROM python:3.10-slim
 
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
 # Ustawiamy katalog roboczy
 WORKDIR /app
 
@@ -28,5 +31,6 @@ COPY . .
 # Eksportujemy port dla Django
 EXPOSE 8000
 
+# Migracje i tworzenie superużytkownika
 # Ustawiamy domyślne polecenie uruchomienia serwera Django
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["sh", "-c", "python manage.py migrate && python manage.py shell < create_superuser.py && python manage.py runserver 0.0.0.0:8000"]

@@ -110,4 +110,3 @@ virtualenv==20.25.1
 wcwidth==0.2.13
 Werkzeug==3.0.1
 widgetsnbextension==4.0.10
-djangorestframework-simplejwt
