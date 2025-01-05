@@ -1,4 +1,4 @@
-from django.contrib.auth.signals import user_logged_in
+from django.contrib.auth.signals import user_logged_in 
 from django.dispatch import receiver
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -21,3 +21,11 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User )
 def save_user_profile(sender, instance, **kwargs):
     instance.userprofile.save()
+
+@receiver(post_save, sender=User)
+def password_changed_handler(sender, instance, **kwargs):
+    if kwargs.get('created', False):
+        return
+    if instance.userprofile.has_changed_password == False:
+        instance.userprofile.has_changed_password = True
+        instance.userprofile.save()

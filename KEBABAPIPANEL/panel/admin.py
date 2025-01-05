@@ -4,6 +4,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 
 @admin.register(Kebab)
+
 class KebabAdmin(admin.ModelAdmin):
     list_display = ['name', 'status', 'opening_hours']
     search_fields = ['name', 'status']
@@ -40,3 +41,15 @@ class KebabAdmin(admin.ModelAdmin):
         if request.user.userprofile.has_changed_password == False:
             return redirect(reverse('admin:password_change'))
         return super().add_view(request, form_url, extra_context)
+    
+    def response_change(self, request, obj):
+        if request.user.userprofile.has_changed_password == False:
+            request.user.userprofile.has_changed_password = True
+            request.user.userprofile.save()
+        return super().response_change(request, obj)
+
+    def response_add(self, request, obj, post_url_continue=None):
+        if request.user.userprofile.has_changed_password == False:
+            request.user.userprofile.has_changed_password = True
+            request.user.userprofile.save()
+        return super().response_add(request, obj, post_url_continue)

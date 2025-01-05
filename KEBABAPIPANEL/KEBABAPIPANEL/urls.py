@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from panel.views import kebab_list_view
 
 urlpatterns = [
     path('api/', include('api.urls')),

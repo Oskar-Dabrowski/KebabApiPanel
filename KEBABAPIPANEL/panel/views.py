@@ -9,6 +9,8 @@ def kebab_list_view(request):
     return render(request, 'kebab_list.html', {'kebabs': kebabs})
 
 def kebab_edit_view(request, id):
+    if not request.user.is_authenticated:
+        return redirect('login')
     kebab = get_object_or_404(Kebab, id=id)
     if request.method == 'POST':
         kebab.name = request.POST.get('name')
@@ -28,7 +30,7 @@ def custom_login(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('/panel/admin')  # Zmień 'home' na nazwę swojej strony głównej
+                return redirect('panel/admin/api')  # Zmień 'home' na nazwę swojej strony głównej
     else:
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
