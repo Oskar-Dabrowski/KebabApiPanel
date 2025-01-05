@@ -58,3 +58,5 @@ KEBABAPIPANEL/db.sqlite3
 
 *.sqlite3
 KEBABAPIPANEL/db.sqlite3
+KEBABAPIPANEL/db.sqlite3
+*.sqlite3
