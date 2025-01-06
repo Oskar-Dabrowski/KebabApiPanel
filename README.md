@@ -5,6 +5,7 @@
 Navigate to the /KEBABAPIPANEL folder and execute this command in the command prompt:
 
 python manage.py migrate 
+docker-compose build
 docker-compose up
 
 To stop
