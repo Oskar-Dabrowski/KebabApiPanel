@@ -1,14 +1,15 @@
-from django.urls import path, include
-from django.contrib import admin
-from .views import kebab_list_view, kebab_edit_view
-from .views import custom_login
-from django.contrib.auth import views as auth_views
+from django.urls import path
+from .views import (
+    kebab_list_view, kebab_edit_view, kebab_detail_view, kebab_edit_social_links,
+    suggestion_list_view, suggestion_accept_view, suggestion_reject_view
+)
 
 urlpatterns = [
-    path('', kebab_list_view, name='kebab_list'),
-    path('login/', auth_views.LoginView.as_view(), name='login'),
     path('kebabs/', kebab_list_view, name='kebab_list'),
     path('kebabs/edit/<int:id>/', kebab_edit_view, name='kebab_edit'),
-    path('admin/', admin.site.urls, name='password_change'),
-    path('password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
+    path('kebabs/<int:id>/', kebab_detail_view, name='kebab_detail'),
+    path('kebabs/<int:id>/edit-social-links/', kebab_edit_social_links, name='kebab_edit_social_links'),
+    path('suggestions/', suggestion_list_view, name='suggestion_list'),
+    path('suggestions/accept/<int:id>/', suggestion_accept_view, name='suggestion_accept'),
+    path('suggestions/reject/<int:id>/', suggestion_reject_view, name='suggestion_reject'),
 ]

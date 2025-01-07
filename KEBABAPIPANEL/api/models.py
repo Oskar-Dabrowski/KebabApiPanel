@@ -18,6 +18,7 @@ class Kebab(models.Model):
     order_methods = models.TextField(blank=True, null=True)
     location_details = models.TextField(blank=True, null=True)
     social_links = models.JSONField(blank=True, null=True)
+    rating = models.FloatField(blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -25,6 +26,20 @@ class Kebab(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     has_changed_password = models.BooleanField(default=False)
-    
+
     def __str__(self):
         return self.user.username
+
+class Suggestion(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    status = models.CharField(
+        max_length=20,
+        choices=[('Pending', 'Pending'), ('Accepted', 'Accepted'), ('Rejected', 'Rejected')],
+        default='Pending'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title

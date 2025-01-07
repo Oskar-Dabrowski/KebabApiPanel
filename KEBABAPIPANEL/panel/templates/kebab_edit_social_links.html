@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Social Links</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Social Links for {{ kebab.name }}</h1>
+        <form method="post">
+            {% csrf_token %}
+            <label for="social_links">Social Links (JSON format):</label>
+            <textarea name="social_links">{{ kebab.social_links }}</textarea>
+            <button type="submit">Save</button>
+        </form>
+    </div>
+</body>
+</html>

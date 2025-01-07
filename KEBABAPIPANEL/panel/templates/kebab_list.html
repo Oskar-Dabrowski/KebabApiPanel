@@ -49,29 +49,11 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            position: relative; /* Dodano, aby umożliwić pozycjonowanie przycisku */
-        }
-        .admin-login {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none; /* Usunięcie podkreślenia */
-        }
-        .admin-login:hover {
-            background-color: #45a049;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="/panel/admin" class="admin-login">Admin Login</a>
         <h1>Kebab List</h1>
         <table>
             <tr>
@@ -86,7 +68,9 @@
                 <td>{{ kebab.status }}</td>
                 <td>{{ kebab.opening_hours }}</td>
                 <td>
-                    <a href="{% url 'kebab_edit' kebab.id %}"><i class="fas fa-edit"></i> Edit</a>
+                    <a href="{% url 'kebab_detail' kebab.id %}"><i class="fas fa-eye"></i> Details</a> |
+                    <a href="{% url 'kebab_edit' kebab.id %}"><i class="fas fa-edit"></i> Edit</a> |
+                    <a href="{% url 'kebab_edit_social_links' kebab.id %}"><i class="fas fa-link"></i> Edit Links</a>
                 </td>
             </tr>
             {% endfor %}

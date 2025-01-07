@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
+from .models import Kebab
 
 class GoogleRatingsFetcher:
     @staticmethod
