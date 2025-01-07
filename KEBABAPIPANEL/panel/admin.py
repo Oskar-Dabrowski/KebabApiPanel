@@ -1,5 +1,5 @@
 from django.contrib import admin
-from api.models import Kebab
+from api.models import Kebab, Suggestion
 from django.shortcuts import redirect
 from django.urls import reverse
 
@@ -53,3 +53,8 @@ class KebabAdmin(admin.ModelAdmin):
             request.user.userprofile.has_changed_password = True
             request.user.userprofile.save()
         return super().response_add(request, obj, post_url_continue)
+    
+@admin.register(Suggestion)
+class SuggestionAdmin(admin.ModelAdmin):
+    list_display = ['user', 'kebab', 'suggestion', 'created_at']
+    search_fields = ['user__username', 'kebab__name']

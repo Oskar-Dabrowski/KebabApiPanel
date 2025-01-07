@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Kebab
+from .models import Kebab, Suggestion
 
 class KebabSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,3 +15,8 @@ class KebabSerializer(serializers.ModelSerializer):
                 if not isinstance(platform, str) or not isinstance(url, str):
                     raise serializers.ValidationError("Both platform names and URLs must be strings.")
         return value
+
+class SuggestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Suggestion
+        fields = '__all__'

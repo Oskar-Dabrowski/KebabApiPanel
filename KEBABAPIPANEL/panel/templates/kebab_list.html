@@ -1,3 +1,4 @@
+<!-- kebab_list.html -->
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -87,6 +88,8 @@
                 <td>{{ kebab.opening_hours }}</td>
                 <td>
                     <a href="{% url 'kebab_edit' kebab.id %}"><i class="fas fa-edit"></i> Edit</a>
+                    <a href="{% url 'check_suggestions' %}"><i class="fas fa-comment"></i> Check Suggestions</a>
+                    <a href="{% url 'add_suggestion' %}"><i class="fas fa-plus"></i> Add Suggestion</a>
                 </td>
             </tr>
             {% endfor %}
