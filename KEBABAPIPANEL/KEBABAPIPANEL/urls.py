@@ -14,15 +14,17 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
+from django.shortcuts import redirect
 from django.urls import path, include
+from api import views
+from panel import views
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
-from panel.views import kebab_list_view
 
 urlpatterns = [
     path('api/', include('api.urls')),
     path('panel/',include('panel.urls')),
+    path('', views.kebab_list_view, name='kebab_list'),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),  # Plik OpenAPI JSON
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('api/documentation/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]

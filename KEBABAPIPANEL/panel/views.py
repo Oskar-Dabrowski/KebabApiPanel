@@ -9,19 +9,6 @@ def kebab_list_view(request):
     kebabs = Kebab.objects.all()
     return render(request, 'kebab_list.html', {'kebabs': kebabs})
 
-def kebab_edit_view(request, id):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    kebab = get_object_or_404(Kebab, id=id)
-    if request.method == 'POST':
-        kebab.name = request.POST.get('name')
-        kebab.description = request.POST.get('description')
-        kebab.opening_hours = request.POST.get('opening_hours')
-        kebab.status = request.POST.get('status')
-        kebab.save()
-        return redirect('kebab_list')
-    return render(request, 'kebab_edit.html', {'kebab': kebab})
-
 def custom_login(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
