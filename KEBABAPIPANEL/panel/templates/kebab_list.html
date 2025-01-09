@@ -73,7 +73,7 @@
 <body>
     <div class="container">
         <a href="/panel/admin/api" class="admin-login">Admin Login</a>
-        <h1>Kebab List</h1>
+        <a href="{% url 'kebab_list' %}"><h1>Kebab List</h1></a>
         <table>
             <tr>
                 <th>Name</th>
@@ -83,9 +83,13 @@
             </tr>
             {% for kebab in kebabs %}
             <tr>
-                <td>{{ kebab.name }}</td>
+                <td><a href="{% url 'kebab_detail' kebab.id %}">{{ kebab.name }}</a></td>
                 <td>{{ kebab.status }}</td>
-                <td>{{ kebab.opening_hours }}</td>
+                <td>
+                    {% for hour in kebab.opening_hours.all %}
+                        {{ hour.day_of_week }}: {{ hour.open_time }} - {{ hour.close_time }}<br>
+                    {% endfor %}
+                </td>
                 <td>
                     <a href="{% url 'check_suggestions' %}"><i class="fas fa-comment"></i> Check Suggestions</a>
                     <a href="{% url 'add_suggestion' %}"><i class="fas fa-plus"></i> Add Suggestion</a>

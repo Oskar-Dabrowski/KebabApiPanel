@@ -1,0 +1,91 @@
+<!-- kebab_detail.html -->
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kebab Detail</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        .admin-login {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none; /* Usunięcie podkreślenia */
+        }
+        .admin-login:hover {
+            background-color: #45a049;
+        }
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .pagination a {
+            text-decoration: none;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .pagination a:hover {
+            color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/panel/admin/api" class="admin-login">Admin Login</a>
+        <a href="{% url 'kebab_list' %}"><h1>Kebab Detail</h1></a>
+        <h2>{{ kebab.name }}</h2>
+        <p>Status: {{ kebab.status }}</p>
+        <p>Opis: {{ kebab.description }}</p>
+        <p>Szerokość geograficzna: {{ kebab.latitude }}</p>
+        <p>Długość geograficzna: {{ kebab.longitude }}</p>
+        <p>Kontakt: {{ kebab.contact }}</p>
+        <p>Mięso: {{ kebab.meats }}</p>
+        <p>Sosy: {{ kebab.sauces }}</p>
+        <p>Godziny otwarcia:</p>
+        <ul>
+            {% for hour in kebab.opening_hours.all %}
+                <li>{{ hour.day_of_week }}: {{ hour.open_time }} - {{ hour.close_time }}</li>
+            {% endfor %}
+        </ul>
+        <p>Ocena rzemieślnicza: {{ kebab.craft_rating }}</p>
+        <p>Czy jest częścią sieci: {{ kebab.in_chain }}</p>
+        <p>Metody zamówienia: {{ kebab.order_methods }}</p>
+        <p>Szczegóły lokalizacji: {{ kebab.location_details }}</p>
+        <p>Linki społecznościowe: {{ kebab.social_links }}</p>
+        <div class="pagination">
+            {% if kebab.previous %}
+                <a href="{% url 'kebab_detail' kebab.previous.pk %}">Poprzedni</a>
+            {% endif %}
+            {% if kebab.next %}
+                <a href="{% url 'kebab_detail' kebab.next.pk %}">Następny</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

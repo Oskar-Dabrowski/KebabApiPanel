@@ -1,4 +1,4 @@
-<!-- panel/templates/add_suggestion.html -->
+<!-- add_suggestion.html -->
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -46,14 +46,27 @@
         button:hover {
             background-color: #45a049;
         }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f4f4f4;
+            border-bottom: 1px solid #ccc;
+        }
+        .navigation button {
+            width: auto;
+            margin: 0 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="navigation">
-            <a href="{% url 'kebab_list' %}">Panel</a>
-            <a href="{% url 'check_suggestions' %}">Check Suggestions</a>
-            <a href="{% url 'add_suggestion' %}">Add Suggestion</a>
+            <button onclick="window.location.href='{% url 'kebab_list' %}'">Panel</button>
+            <button onclick="window.location.href='{% url 'check_suggestions' %}'">Check Suggestions</button>
+            <button onclick="window.location.href='{% url 'add_suggestion' %}'">Add Suggestion</button>
+            <button onclick="window.location.href='/panel/admin/api'" class="admin-login">Edit Suggestions(admin)</button>
         </div>
         <h1>Add Suggestion</h1>
         <form method="POST">
@@ -65,10 +78,13 @@
                 {% endfor %}
             </select>
 
-            <label for="suggestion">Your Suggestion:</label>
-            <textarea id="suggestion" name="suggestion" rows="4" required></textarea>
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" required>
 
-            <button type="submit">Submit Suggestion</button>
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="4" required></textarea>
+
+            <button type="submit"> Submit Suggestion</button>
         </form>
     </div>
 </body>

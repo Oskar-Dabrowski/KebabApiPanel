@@ -13,9 +13,14 @@ class KebabAdmin(admin.ModelAdmin):
 
 @admin.register(OpeningHour)
 class OpeningHourAdmin(admin.ModelAdmin):
-    list_display = ['kebab', 'day_of_week', 'open_time', 'close_time']
+    list_display = ['kebab_name', 'day_of_week', 'open_time', 'close_time']
     search_fields = ['kebab__name', 'day_of_week']
     list_filter = ['kebab__name', 'day_of_week']
+
+    def kebab_name(self, obj):
+        return obj.kebab.name
+    kebab_name.short_description = 'Kebab'
+    kebab_name.admin_order_field = 'kebab__name'
 
     def has_change_permission(self, request, obj=None):
         if request.user.userprofile.has_changed_password == False:
@@ -61,6 +66,11 @@ class OpeningHourAdmin(admin.ModelAdmin):
     
 @admin.register(Suggestion)
 class SuggestionAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'kebab', 'status', 'created_at')
+    list_display = ('title', 'user', 'kebab_name', 'status', 'created_at')
     list_filter = ('status', 'created_at')
-    search_fields = ('title', 'userusername', 'kebabname')
+    search_fields = ('title', 'user__username', 'kebab__name')
+
+    def kebab_name(self, obj):
+        return obj.kebab.name
+    kebab_name.short_description = 'Kebab'
+    kebab_name.admin_order_field = 'kebab__name'

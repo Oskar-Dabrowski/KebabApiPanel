@@ -8,6 +8,7 @@ urlpatterns = [
     path('', kebab_list_view, name='kebab_list'),
     path('login/', auth_views.LoginView.as_view(), name='login'),
     path('kebabs/', kebab_list_view, name='kebab_list'),
+    path('kebabs/<int:pk>/', views.kebab_detail, name='kebab_detail'),
     path('admin/', admin.site.urls, name='password_change'),
     path('password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
     path('check_suggestions/', views.check_suggestions, name='check_suggestions'),

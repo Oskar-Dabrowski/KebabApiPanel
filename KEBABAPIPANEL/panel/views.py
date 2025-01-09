@@ -32,7 +32,8 @@ def add_suggestion(request):
     if request.method == 'POST':
         # Handle form submission
         kebab_id = request.POST.get('kebab')
-        suggestion_text = request.POST.get('suggestion')
+        title = request.POST.get('title')
+        description = request.POST.get('description')
         
         # Ensure the kebab exists
         try:
@@ -40,8 +41,12 @@ def add_suggestion(request):
         except Kebab.DoesNotExist:
             return HttpResponse("Kebab not found", status=404)
         
+        # Check if description is not empty
+        if not description:
+            return HttpResponse("Description is required", status=400)
+        
         # Create the suggestion
-        Suggestion.objects.create(user=request.user, kebab=kebab, suggestion=suggestion_text)
+        Suggestion.objects.create(user=request.user, kebab=kebab, title=title, description=description)
         return redirect('check_suggestions')  # Redirect to the suggestions list after submission
     
     # Handle GET request (render the form)
@@ -61,4 +66,10 @@ def suggestion_update(request, pk, action):
     elif action == 'reject':
         suggestion.status = 'Rejected'
     suggestion.save()
-    return redirect('suggestion_list')
+    return redirect('suggestion_list')\
+    
+def kebab_detail(request, pk):
+    kebab = get_object_or_404(Kebab , pk=pk)
+    previous_kebab = Kebab.objects.filter(pk__lt=pk).order_by('-pk').first()
+    next_kebab = Kebab.objects.filter(pk__gt=pk).order_by('pk').first()
+    return render(request, 'kebab_detail.html', {'kebab': kebab, 'previous': previous_kebab, 'next': next_kebab})
