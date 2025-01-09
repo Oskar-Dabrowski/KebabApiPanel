@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils.timezone import now
 
 class Kebab(models.Model):
     name = models.CharField(max_length=255)
@@ -18,6 +19,16 @@ class Kebab(models.Model):
     order_methods = models.TextField(blank=True, null=True)
     location_details = models.TextField(blank=True, null=True)
     social_links = models.JSONField(blank=True, null=True)
+    logo = models.ImageField(upload_to='kebab_logos/', blank=True, null=True)
+    google_rating = models.FloatField(blank=True, null=True)
+    pyszne_rating = models.FloatField(blank=True, null=True)
+    last_updated = models.DateTimeField(default=now)
+
+class UserComment(models.Model):
+    kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name="comments")
+    user_name = models.CharField(max_length=255)
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class OpeningHour(models.Model):
     kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name="opening_hours")
@@ -44,11 +55,11 @@ class UserProfile(models.Model):
         return self.user.username
     
 class Suggestion(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='suggestions')  # Relacja do użytkownika
-    kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name='suggestions')  # Relacja do kebabu
-    title = models.CharField(max_length=255)  # Tytuł sugestii
-    description = models.TextField()  # Opis sugestii
-    status = models.CharField(  # Status sugestii
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='suggestions')
+    kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name='suggestions')
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    status = models.CharField(
         max_length=20,
         choices=[
             ('Pending', 'Pending'),
@@ -57,7 +68,7 @@ class Suggestion(models.Model):
         ],
         default='Pending'
     )
-    created_at = models.DateTimeField(auto_now_add=True)  # Data utworzenia
-    updated_at = models.DateTimeField(auto_now=True)  # Data ostatniej aktualizacji
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     

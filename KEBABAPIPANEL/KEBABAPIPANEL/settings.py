@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -135,3 +135,5 @@ REST_FRAMEWORK = {
 }
 
 LOGIN_REDIRECT_URL = '/panel/admin/password_change/'
+
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', 'your-default-google-api-key')
