@@ -1,16 +1,21 @@
 from django.contrib import admin
-from api.models import Kebab, Suggestion
+from api.models import Kebab, OpeningHour, Suggestion
 from django.shortcuts import redirect
 from django.urls import reverse
 
 @admin.register(Kebab)
-
 class KebabAdmin(admin.ModelAdmin):
-    list_display = ['name', 'status', 'opening_hours']
+    list_display = ['name', 'status']
     search_fields = ['name', 'status']
-    fields = ['name', 'description', 'latitude', 'longitude', 'opening_hours',
-              'contact', 'meats', 'sauces', 'status', 'craft_rating',
+    fields = ['name', 'description', 'latitude', 'longitude',
+              'contact', 'meats', 'sauces', 'status', 'craft_rating', 'in_chain', 
               'order_methods', 'location_details', 'social_links']
+
+@admin.register(OpeningHour)
+class OpeningHourAdmin(admin.ModelAdmin):
+    list_display = ['kebab', 'day_of_week', 'open_time', 'close_time']
+    search_fields = ['kebab__name', 'day_of_week']
+    list_filter = ['kebab__name', 'day_of_week']
 
     def has_change_permission(self, request, obj=None):
         if request.user.userprofile.has_changed_password == False:
@@ -56,5 +61,6 @@ class KebabAdmin(admin.ModelAdmin):
     
 @admin.register(Suggestion)
 class SuggestionAdmin(admin.ModelAdmin):
-    list_display = ['user', 'kebab', 'suggestion', 'created_at']
-    search_fields = ['user__username', 'kebab__name']
+    list_display = ('title', 'user', 'kebab', 'status', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('title', 'userusername', 'kebabname')

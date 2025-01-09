@@ -4,6 +4,7 @@ from django.shortcuts import redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse
+from django.contrib.auth.decorators import user_passes_test
 
 def kebab_list_view(request):
     kebabs = Kebab.objects.all()
@@ -46,3 +47,18 @@ def add_suggestion(request):
     # Handle GET request (render the form)
     kebabs = Kebab.objects.all()  # Fetch all kebabs for the dropdown
     return render(request, 'add_suggestion.html', {'kebabs': kebabs})
+
+@user_passes_test(lambda u: u.is_staff)
+def suggestion_list(request):
+    suggestions = Suggestion.objects.all()
+    return render(request, 'suggestion_list.html', {'suggestions': suggestions})
+
+@user_passes_test(lambda u: u.is_staff)
+def suggestion_update(request, pk, action):
+    suggestion = get_object_or_404(Suggestion, pk=pk)
+    if action == 'accept':
+        suggestion.status = 'Accepted'
+    elif action == 'reject':
+        suggestion.status = 'Rejected'
+    suggestion.save()
+    return redirect('suggestion_list')

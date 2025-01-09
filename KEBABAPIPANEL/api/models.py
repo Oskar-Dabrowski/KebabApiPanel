@@ -6,7 +6,6 @@ class Kebab(models.Model):
     description = models.TextField()
     latitude = models.FloatField()
     longitude = models.FloatField()
-    opening_hours = models.CharField(max_length=255)
     contact = models.CharField(max_length=20, blank=True, null=True)
     meats = models.TextField(blank=True, null=True)
     sauces = models.TextField(blank=True, null=True)
@@ -15,12 +14,27 @@ class Kebab(models.Model):
         choices=[('open', 'Open'), ('closed', 'Closed'), ('planned', 'Planned')]
     )
     craft_rating = models.BooleanField(default=False)
+    in_chain = models.BooleanField(default=False)
     order_methods = models.TextField(blank=True, null=True)
     location_details = models.TextField(blank=True, null=True)
     social_links = models.JSONField(blank=True, null=True)
 
-    def __str__(self):
-        return self.name
+class OpeningHour(models.Model):
+    kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name="opening_hours")
+    day_of_week = models.CharField(
+        max_length=10,
+        choices=[
+            ('monday', 'Monday'),
+            ('tuesday', 'Tuesday'),
+            ('wednesday', 'Wednesday'),
+            ('thursday', 'Thursday'),
+            ('friday', 'Friday'),
+            ('saturday', 'Saturday'),
+            ('sunday', 'Sunday'),
+        ]
+    )
+    open_time = models.TimeField()
+    close_time = models.TimeField()
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -30,10 +44,20 @@ class UserProfile(models.Model):
         return self.user.username
     
 class Suggestion(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE)
-    suggestion = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.kebab.name}"
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='suggestions')  # Relacja do użytkownika
+    kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name='suggestions')  # Relacja do kebabu
+    title = models.CharField(max_length=255)  # Tytuł sugestii
+    description = models.TextField()  # Opis sugestii
+    status = models.CharField(  # Status sugestii
+        max_length=20,
+        choices=[
+            ('Pending', 'Pending'),
+            ('Accepted', 'Accepted'),
+            ('Rejected', 'Rejected'),
+        ],
+        default='Pending'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)  # Data utworzenia
+    updated_at = models.DateTimeField(auto_now=True)  # Data ostatniej aktualizacji
+    
+    
