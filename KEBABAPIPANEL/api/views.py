@@ -7,6 +7,8 @@ from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Kebab
 from .serializers import KebabSerializer
+from .models import Suggestion
+from .serializers import SuggestionSerializer
 
 class RegisterUserView(APIView):
     def post(self, request):
@@ -45,3 +47,17 @@ class KebabDetailView(RetrieveAPIView):
     queryset = Kebab.objects.all()
     serializer_class = KebabSerializer
     lookup_field = 'id'
+
+class SuggestionView(APIView):
+    def post(self, request):
+        serializer = SuggestionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+class SuggestionListView(APIView):
+    def get(self, request):
+        suggestions = Suggestion.objects.all()
+        serializer = SuggestionSerializer(suggestions, many=True)
+        return Response(serializer.data)

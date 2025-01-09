@@ -1,0 +1,131 @@
+<!-- check_suggestions.html -->
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Suggestions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        li:last-child {
+            border-bottom: none;
+        }
+        .suggestion {
+            font-weight: bold;
+        }
+        .user {
+            font-size: 14px;
+            color: #666;
+        }
+        .kebab {
+            font-size: 14px;
+            color: #666;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="navigation">
+            <a href ="{% url 'kebab_list' %}">Panel</a>
+            <a href="{% url 'check_suggestions' %}">Check Suggestions</a>
+            <a href="{% url 'add_suggestion' %}">Add Suggestion</a>
+        </div>
+        <h1>Check Suggestions</h1>
+        <ul>
+            {% for suggestion in suggestions %}
+            <li>
+                <span class="suggestion">{{ suggestion.suggestion }}</span>
+                <br>
+                <span class="user">:User  {{ suggestion.user.username }}</span>
+                <br>
+                <span class="kebab">Kebab: {{ suggestion.kebab.name }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        <button onclick="addExampleSuggestion()">Add Example Suggestion</button>
+
+        <script>
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            function addExampleSuggestion() {
+                const kebabId = 1; // Replace with the ID of the kebab
+                const suggestion = "This is an example suggestion.";
+                const url = "{% url 'add_suggestion' %}";
+                const csrfToken = getCookie('csrftoken'); // Get CSRF token
+
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: {
+                        kebab: kebabId,
+                        suggestion: suggestion,
+                        csrfmiddlewaretoken: csrfToken // Include CSRF token
+                    },
+                    success: function(response) {
+                        console.log("Suggestion added successfully!");
+                        location.reload(); // Refresh the page to show the new suggestion
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error adding suggestion:", error);
+                        alert("Failed to add suggestion. Please try again.");
+ }
+                });
+            }
+        </script>
+    </div>
+</body>
+</html>
