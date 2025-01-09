@@ -78,7 +78,7 @@
         <p>Metody zamówienia: {{ kebab.order_methods }}</p>
         <p>Szczegóły lokalizacji: {{ kebab.location_details }}</p>
         <p>Linki społecznościowe: {{ kebab.social_links }}</p>
-        <p>Logo: {{ kebab.logo }}</p>
+        <p>Logo: <img src="{{ kebab.logo.url }}" alt="Logo"></p>
         <p>Ocena Google: {{ kebab.google_rating }}</p>
         <p>Ocena Pyszne.pl: {{ kebab.pyszne_rating }}</p>
         <p>Data ostatniej aktualizacji: {{ kebab.last_updated }}</p>
