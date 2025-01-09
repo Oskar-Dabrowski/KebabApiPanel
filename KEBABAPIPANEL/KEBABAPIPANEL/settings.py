@@ -137,3 +137,10 @@ REST_FRAMEWORK = {
 LOGIN_REDIRECT_URL = '/panel/admin/password_change/'
 
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', 'your-default-google-api-key')
+
+MEDIA_URL = '/media/'  # Public URL used to access uploaded files
+MEDIA_ROOT = BASE_DIR / 'media'  # Directory where files are stored
+
+
+
+

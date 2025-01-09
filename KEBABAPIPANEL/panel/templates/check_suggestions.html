@@ -74,6 +74,12 @@
             width: auto;
             margin: 0 10px;
         }
+        .rejected-suggestions {
+            margin-top: 20px;
+        }
+        .rejected-suggestions li {
+            text-decoration: line-through;
+        }
     </style>
 </head>
 <body>
@@ -87,6 +93,7 @@
         <h1>Check Suggestions</h1>
         <ul>
             {% for suggestion in suggestions %}
+            {% if suggestion.status == 'Pending' %}
             <li>
                 <span class="suggestion">{{ suggestion.title }}</span>
                 <br>
@@ -98,10 +105,31 @@
                 <br>
                 <span class="status">Status: {{ suggestion.status }}</span>
             </li>
+            {% endif %}
             {% endfor %}
         </ul>
         <button onclick="addExampleSuggestion()">Add Example Suggestion</button>
-
+        <h2>Last Suggestions</h2>
+        <div class="rejected-suggestions">
+            <ul>
+                {% for suggestion in suggestions %}
+                {% if suggestion.status != 'Pending' %}
+                <li>
+                    <span class="suggestion">{{ suggestion.title }}</span>
+                    <br>
+                    <span class="user">:User   {{ suggestion.user.username }}</span>
+                    <br>
+                    <span class="kebab">Kebab: {{ suggestion.kebab.name }}</span>
+                    <br>
+                    <span class="description">{{ suggestion.description }}</span>
+                    <br>
+                    <span class="status" style="text-decoration: none">Status: {{ suggestion.status }}</span>
+                </li>
+                {% endif %}
+                {% endfor %}
+ </ul>
+        </div>
+        
         <script>
             function getCookie(name) {
                 let cookieValue = null;
@@ -119,32 +147,31 @@
             }
 
             function addExampleSuggestion() {
-    const kebabId = 1; // Replace with the ID of the kebab
-    const title = "Example Suggestion";
-    const description = "This is an example suggestion.";
-    const url = "{% url 'add_suggestion' %}";
-    const csrfToken = getCookie('csrftoken'); // Get CSRF token
+                const kebabId = 1; // Replace with the ID of the kebab
+                const title = "Example Suggestion";
+                const description = "This is an example suggestion.";
+                const url = "{% url 'add_suggestion' %}";
+                const csrfToken = getCookie('csrftoken'); // Get CSRF token
 
-    $.ajax({
-        type: 'POST',
-        url: url,
-        data: {
-            kebab: kebabId,
-            title: title,
-            description: description,
-            csrfmiddlewaretoken: csrfToken // Include CSRF token
-        },
-        success: function(response) {
-            console.log("Suggestion added successfully!");
-            location.reload(); // Refresh the page to show the new suggestion
-        },
-        error: function(xhr, status, error) {
-            console.error("Error adding suggestion:", error);
-            alert("Failed to add suggestion. Please try again.");
-        }
-    });
-}
-            
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: {
+                        kebab: kebabId,
+                        title: title,
+                        description: description,
+                        csrfmiddlewaretoken: csrfToken // Include CSRF token
+                    },
+                    success: function(response) {
+                        console.log("Suggestion added successfully!");
+                        location.reload(); // Refresh the page to show the new suggestion
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error adding suggestion:", error);
+                        alert("Failed to add suggestion. Please try again.");
+                    }
+                });
+            }
         </script>
     </div>
 </body>

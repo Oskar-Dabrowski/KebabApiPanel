@@ -78,6 +78,10 @@
         <p>Metody zamówienia: {{ kebab.order_methods }}</p>
         <p>Szczegóły lokalizacji: {{ kebab.location_details }}</p>
         <p>Linki społecznościowe: {{ kebab.social_links }}</p>
+        <p>Logo: {{ kebab.logo }}</p>
+        <p>Ocena Google: {{ kebab.google_rating }}</p>
+        <p>Ocena Pyszne.pl: {{ kebab.pyszne_rating }}</p>
+        <p>Data ostatniej aktualizacji: {{ kebab.last_updated }}</p>
         <div class="pagination">
             {% if kebab.previous %}
                 <a href="{% url 'kebab_detail' kebab.previous.pk %}">Poprzedni</a>

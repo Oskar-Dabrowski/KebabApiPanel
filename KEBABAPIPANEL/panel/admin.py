@@ -9,7 +9,7 @@ class KebabAdmin(admin.ModelAdmin):
     search_fields = ['name', 'status']
     fields = ['name', 'description', 'latitude', 'longitude',
               'contact', 'meats', 'sauces', 'status', 'craft_rating', 'in_chain', 
-              'order_methods', 'location_details', 'social_links']
+              'order_methods', 'location_details', 'social_links', 'logo', 'google_rating', 'pyszne_rating', 'last_updated']
 
 @admin.register(OpeningHour)
 class OpeningHourAdmin(admin.ModelAdmin):
