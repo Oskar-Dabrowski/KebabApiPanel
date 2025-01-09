@@ -4,8 +4,8 @@ from .views import (
     LoginUserView,
     KebabListView,
     KebabDetailView,
-    SuggestionListCreateView,
-    SuggestionDetailView,
+    SuggestionView,
+    SuggestionListView,
 )
 
 urlpatterns = [
@@ -18,6 +18,6 @@ urlpatterns = [
     path('kebabs/<int:id>', KebabDetailView.as_view(), name='kebab_detail'),
     
     # Suggestion-related endpoints
-    path('suggestions', SuggestionListCreateView.as_view(), name='suggestion_list_create'),
-    path('suggestions/<int:pk>', SuggestionDetailView.as_view(), name='suggestion_detail'),
+    path('suggestions', SuggestionListView.as_view(), name='suggestion_list_create'),
+    path('suggestions/<int:pk>', SuggestionView.as_view(), name='suggestion_detail'),
 ]

@@ -1,12 +1,12 @@
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import Kebab
-from .serializers import KebabSerializer
+from .models import Kebab, Suggestion
+from .serializers import KebabSerializer, SuggestionSerializer
 from .models import Suggestion
 from .serializers import SuggestionSerializer
 
@@ -61,3 +61,7 @@ class SuggestionListView(APIView):
         suggestions = Suggestion.objects.all()
         serializer = SuggestionSerializer(suggestions, many=True)
         return Response(serializer.data)
+    
+class SuggestionListCreateView(ListCreateAPIView):
+    queryset = Suggestion.objects.all()
+    serializer_class = SuggestionSerializer
