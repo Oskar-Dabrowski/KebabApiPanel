@@ -7,6 +7,9 @@ from .views import (
     KebabDetailView,
     SuggestionView,
     SuggestionListView,
+    AddFavoriteView,
+    RemoveFavoriteView,
+    AddUserCommentView,
 )
 
 urlpatterns = [
@@ -21,4 +24,11 @@ urlpatterns = [
     # Suggestion-related endpoints
     path('suggestions', SuggestionListView.as_view(), name='suggestion_list_create'),
     path('suggestions/<int:pk>', SuggestionView.as_view(), name='suggestion_detail'),
+    
+    # Favorites-related endpoints
+    path('kebabs/<int:id>/favorite', AddFavoriteView.as_view(), name='add_favorite'),
+    path('kebabs/<int:id>/unfavorite', RemoveFavoriteView.as_view(), name='remove_favorite'),
+
+    # Comments-related endpoints
+    path('kebabs/<int:id>/comment', AddUserCommentView.as_view(), name='add_user_comment'),
 ]

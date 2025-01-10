@@ -25,10 +25,10 @@ class Kebab(models.Model):
     last_updated = models.DateTimeField(default=now)
 
 class UserComment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name="comments")
-    user_name = models.CharField(max_length=255)
-    comment = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    text = models.TextField()
+    created_at = models.DateTimeField(default=now)
 
 class OpeningHour(models.Model):
     kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name="opening_hours")
@@ -70,5 +70,11 @@ class Suggestion(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
-    
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(default=now)
+
+    class Meta:
+        unique_together = ('user', 'kebab')
