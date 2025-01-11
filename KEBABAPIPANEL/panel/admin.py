@@ -1,21 +1,24 @@
 from django.contrib import admin
-from api.models import Kebab, OpeningHour, Suggestion
+from api.models import Kebab, OpeningHour, Suggestion, UserComment, UserProfile, Favorite
 from django.shortcuts import redirect
 from django.urls import reverse
 
 @admin.register(Kebab)
 class KebabAdmin(admin.ModelAdmin):
-    list_display = ['name', 'status']
-    search_fields = ['name', 'status']
-    fields = ['name', 'description', 'latitude', 'longitude',
-              'contact', 'meats', 'sauces', 'status', 'craft_rating', 'in_chain', 
-              'order_methods', 'location_details', 'social_links']
+    list_display = ['name', 'status', 'google_rating', 'pyszne_rating', 'last_updated']
+    search_fields = ['name', 'status', 'description', 'contact', 'meats', 'sauces', 'craft_rating', 'in_chain', 'order_methods', 'location_details', 'google_rating', 'pyszne_rating', 'last_updated']
+    list_filter = ['name', 'status', 'description', 'contact', 'meats', 'sauces', 'craft_rating', 'in_chain', 'order_methods', 'location_details', 'google_rating', 'pyszne_rating', 'last_updated']
 
 @admin.register(OpeningHour)
 class OpeningHourAdmin(admin.ModelAdmin):
-    list_display = ['kebab', 'day_of_week', 'open_time', 'close_time']
-    search_fields = ['kebab__name', 'day_of_week']
-    list_filter = ['kebab__name', 'day_of_week']
+    list_display = ['kebab_name', 'day_of_week', 'open_time', 'close_time']
+    search_fields = ['kebab__name', 'day_of_week', 'open_time', 'close_time']
+    list_filter = ['kebab__name', 'day_of_week', 'open_time', 'close_time']
+
+    def kebab_name(self, obj):
+        return obj.kebab.name
+    kebab_name.short_description = 'Kebab'
+    kebab_name.admin_order_field = 'kebab__name'
 
     def has_change_permission(self, request, obj=None):
         if request.user.userprofile.has_changed_password == False:
@@ -61,6 +64,49 @@ class OpeningHourAdmin(admin.ModelAdmin):
     
 @admin.register(Suggestion)
 class SuggestionAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'kebab', 'status', 'created_at')
-    list_filter = ('status', 'created_at')
-    search_fields = ('title', 'userusername', 'kebabname')
+    list_display = ('title', 'user', 'kebab_name', 'status', 'created_at')
+    search_fields = ('title', 'user__username', 'kebab__name', 'status', 'created_at')
+    list_filter = ('user__username', 'kebab__name', 'status', 'created_at')
+
+    def kebab_name(self, obj):
+        return obj.kebab.name
+    kebab_name.short_description = 'Kebab'
+    kebab_name.admin_order_field = 'kebab__name'
+
+@admin.register(UserComment)
+class UserCommentAdmin(admin.ModelAdmin):
+    list_display = ('user_name', 'kebab_name', 'text', 'created_at')
+    search_fields = ('user__username', 'kebab__name', 'text', 'created_at')
+    list_filter = ('user', 'kebab', 'created_at')
+
+    def user_name(self, obj):
+        return obj.user.username
+    user_name.short_description = 'User'
+    user_name.admin_order_field = 'user__username'
+
+    def kebab_name(self, obj):
+        return obj.kebab.name
+    kebab_name.short_description = 'Kebab'
+    kebab_name.admin_order_field = 'kebab__name'
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'has_changed_password')
+    list_filter = ('has_changed_password',)
+    search_fields = ('user__username',)
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ('user_name', 'kebab_name', 'created_at')
+    search_fields = ('user__username', 'kebab__name', 'created_at')
+    list_filter = ('user', 'user__username', 'kebab__name', 'created_at')
+
+    def user_name(self, obj):
+        return obj.user.username
+    user_name.short_description = 'User'
+    user_name.admin_order_field = 'user__username'
+
+    def kebab_name(self, obj):
+        return obj.kebab.name
+    kebab_name.short_description = 'Kebab'
+    kebab_name.admin_order_field = 'kebab__name'

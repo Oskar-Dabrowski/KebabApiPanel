@@ -9,14 +9,20 @@ class GoogleRatingsFetcher:
         params = {
             "input": kebab_name,
             "inputtype": "textquery",
-            "fields": "rating",
+            "fields": "rating,place_id",
             "key": settings.GOOGLE_API_KEY
         }
         response = requests.get(base_url, params=params)
         response.raise_for_status()
         data = response.json()
         if "candidates" in data and data["candidates"]:
-            return data["candidates"][0].get("rating")
+            candidate = data["candidates"][0]
+            rating = candidate.get("rating")
+            place_id = candidate.get("place_id")
+            return {
+                "rating": rating,
+                "place_id": place_id
+            }
         return None
 
 class PyszneRatingsFetcher:
@@ -26,7 +32,15 @@ class PyszneRatingsFetcher:
         response = requests.get(search_url)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        rating_tag = soup.find('span', class_='rating-value')
-        if rating_tag:
-            return float(rating_tag.text.strip())
+        restaurant_card = soup.find('a', class_='restaurant')
+        if restaurant_card:
+            rating_tag = restaurant_card.find('span', class_='rating-value')
+            if rating_tag:
+                try:
+                    return {
+                        "rating": float(rating_tag.text.strip()),
+                        "restaurant_url": restaurant_card['href']
+                    }
+                except ValueError:
+                    return None
         return None
