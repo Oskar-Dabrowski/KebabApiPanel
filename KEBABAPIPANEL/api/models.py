@@ -72,8 +72,8 @@ class Suggestion(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 class Favorite(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
+    kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name='favorited_by')
     created_at = models.DateTimeField(default=now)
 
     class Meta:

@@ -13,4 +13,7 @@ urlpatterns = [
     path('password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
     path('check_suggestions/', views.check_suggestions, name='check_suggestions'),
     path('add_suggestion/', views.add_suggestion, name='add_suggestion'),
+    path('kebabs/<int:pk>/favorite/', views.add_favorite, name='add_favorite'),
+    path('kebabs/<int:pk>/unfavorite/', views.remove_favorite, name='remove_favorite'),
+    path('kebabs/<int:pk>/comment/', views.add_user_comment, name='add_user_comment'),
 ]
