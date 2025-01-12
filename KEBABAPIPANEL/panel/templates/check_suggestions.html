@@ -1,4 +1,3 @@
-<!-- check_suggestions.html -->
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -70,9 +69,17 @@
             background-color: #f4f4f4;
             border-bottom: 1px solid #ccc;
         }
-        .navigation button {
-            width: auto;
-            margin: 0 10px;
+        .navigation a {
+            text-decoration: none;
+            color: white;
+            background-color: #4CAF50;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: inline-block;
+        }
+        .navigation a:hover {
+            background-color: #45a049;
         }
         .rejected-suggestions {
             margin-top: 20px;
@@ -85,10 +92,10 @@
 <body>
     <div class="container">
         <div class="navigation">
-            <button onclick="window.location.href='{% url 'kebab_list' %}'">Panel</button>
-            <button onclick="window.location.href='{% url 'check_suggestions' %}'">Check Suggestions</button>
-            <button onclick="window.location.href='{% url 'add_suggestion' %}'">Add Suggestion</button>
-            <button onclick="window.location.href='/panel/admin/api'" class="admin-login">Edit Suggestions(admin)</button>
+            <a href="{% url 'kebab_list' %}">Panel</a>
+            <a href="{% url 'check_suggestions' %}">Check Suggestions</a>
+            <a href="{% url 'add_suggestion' %}">Add Suggestion</a>
+            <a href="/panel/admin/api" class="admin-login">Edit Suggestions(admin)</a>
         </div>
         <h1>Check Suggestions</h1>
         <ul>
@@ -97,7 +104,7 @@
             <li>
                 <span class="suggestion">{{ suggestion.title }}</span>
                 <br>
-                <span class="user">:User   {{ suggestion.user.username }}</span>
+                <span class="user">User: {{ suggestion.user.username }}</span>
                 <br>
                 <span class="kebab">Kebab: {{ suggestion.kebab.name }}</span>
                 <br>
@@ -108,7 +115,7 @@
             {% endif %}
             {% endfor %}
         </ul>
-        <button onclick="addExampleSuggestion()">Add Example Suggestion</button>
+        <button id="example-suggestion-btn">Add Example Suggestion</button>
         <h2>Last Suggestions</h2>
         <div class="rejected-suggestions">
             <ul>
@@ -117,7 +124,7 @@
                 <li>
                     <span class="suggestion">{{ suggestion.title }}</span>
                     <br>
-                    <span class="user">:User   {{ suggestion.user.username }}</span>
+                    <span class="user">User: {{ suggestion.user.username }}</span>
                     <br>
                     <span class="kebab">Kebab: {{ suggestion.kebab.name }}</span>
                     <br>
@@ -127,7 +134,7 @@
                 </li>
                 {% endif %}
                 {% endfor %}
- </ul>
+            </ul>
         </div>
         
         <script>
@@ -146,11 +153,11 @@
                 return cookieValue;
             }
 
-            function addExampleSuggestion() {
+            document.getElementById('example-suggestion-btn').addEventListener('click', function() {
                 const kebabId = 1; // Replace with the ID of the kebab
                 const title = "Example Suggestion";
                 const description = "This is an example suggestion.";
-                const url = "{% url 'add_suggestion' %}";
+                const url = "{{ url 'add_suggestion' }}";
                 const csrfToken = getCookie('csrftoken'); // Get CSRF token
 
                 $.ajax({
@@ -171,7 +178,7 @@
                         alert("Failed to add suggestion. Please try again.");
                     }
                 });
-            }
+            });
         </script>
     </div>
 </body>

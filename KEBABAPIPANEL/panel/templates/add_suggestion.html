@@ -1,4 +1,3 @@
-<!-- add_suggestion.html -->
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -63,9 +62,9 @@
 <body>
     <div class="container">
         <div class="navigation">
-            <button onclick="window.location.href='{% url 'kebab_list' %}'">Panel</button>
-            <button onclick="window.location.href='{% url 'check_suggestions' %}'">Check Suggestions</button>
-            <button onclick="window.location.href='{% url 'add_suggestion' %}'">Add Suggestion</button>
+            <button id="panel-btn">Panel</button>
+            <button id="check-suggestions-btn">Check Suggestions</button>
+            <button id="add-suggestions-btn">Add Suggestion</button>
             <button onclick="window.location.href='/panel/admin/api'" class="admin-login">Edit Suggestions(admin)</button>
         </div>
         <h1>Add Suggestion</h1>
@@ -84,8 +83,27 @@
             <label for="description">Description:</label>
             <textarea id="description" name="description" rows="4" required></textarea>
 
-            <button type="submit"> Submit Suggestion</button>
+            <button type="submit">Submit Suggestion</button>
         </form>
+        <script>
+            // Assign URLs from Django to JavaScript variables
+            const panelUrl = '{{ url "kebab_list" }}';
+            const checkSuggestionsUrl = '{{ url "check_suggestions" }}';
+            const addSuggestionUrl = '{{ url "add_suggestion" }}';
+
+            // Add event listeners for buttons
+            document.getElementById('panel-btn').addEventListener('click', () => {
+                window.location.href = panelUrl;
+            });
+
+            document.getElementById('check-suggestions-btn').addEventListener('click', () => {
+                window.location.href = checkSuggestionsUrl;
+            });
+
+            document.getElementById('add-suggestions-btn').addEventListener('click', () => {
+                window.location.href = addSuggestionUrl;
+            });
+        </script>
     </div>
 </body>
 </html>

@@ -1,15 +1,16 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from api.models import Kebab, Suggestion
-from django.shortcuts import redirect
+from django.http import JsonResponse, HttpResponse
+from django.contrib.auth.decorators import user_passes_test, login_required
+from api.models import Kebab, Suggestion, OpeningHour
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import HttpResponse
-from django.contrib.auth.decorators import user_passes_test
 
+# Home: Kebab List View
 def kebab_list_view(request):
     kebabs = Kebab.objects.all()
     return render(request, 'kebab_list.html', {'kebabs': kebabs})
 
+# Login View
 def custom_login(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -19,57 +20,59 @@ def custom_login(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('panel/admin/api')  # Zmień 'home' na nazwę swojej strony głównej
+                return redirect('kebab_list')  # Redirect to kebab list after login
     else:
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
 
+# Check Suggestions
+@user_passes_test(lambda u: u.is_staff)
 def check_suggestions(request):
     suggestions = Suggestion.objects.all()
     return render(request, 'check_suggestions.html', {'suggestions': suggestions})
 
+# Add Suggestion
+@login_required
 def add_suggestion(request):
     if request.method == 'POST':
-        # Handle form submission
         kebab_id = request.POST.get('kebab')
         title = request.POST.get('title')
         description = request.POST.get('description')
         
-        # Ensure the kebab exists
-        try:
-            kebab = Kebab.objects.get(id=kebab_id)
-        except Kebab.DoesNotExist:
-            return HttpResponse("Kebab not found", status=404)
+        kebab = get_object_or_404(Kebab, id=kebab_id)
         
-        # Check if description is not empty
         if not description:
             return HttpResponse("Description is required", status=400)
         
-        # Create the suggestion
         Suggestion.objects.create(user=request.user, kebab=kebab, title=title, description=description)
-        return redirect('check_suggestions')  # Redirect to the suggestions list after submission
+        return redirect('check_suggestions')
     
-    # Handle GET request (render the form)
-    kebabs = Kebab.objects.all()  # Fetch all kebabs for the dropdown
+    kebabs = Kebab.objects.all()
     return render(request, 'add_suggestion.html', {'kebabs': kebabs})
 
-@user_passes_test(lambda u: u.is_staff)
-def suggestion_list(request):
-    suggestions = Suggestion.objects.all()
-    return render(request, 'suggestion_list.html', {'suggestions': suggestions})
-
-@user_passes_test(lambda u: u.is_staff)
-def suggestion_update(request, pk, action):
-    suggestion = get_object_or_404(Suggestion, pk=pk)
-    if action == 'accept':
-        suggestion.status = 'Accepted'
-    elif action == 'reject':
-        suggestion.status = 'Rejected'
-    suggestion.save()
-    return redirect('suggestion_list')\
-    
+# Kebab Detail View
 def kebab_detail(request, pk):
-    kebab = get_object_or_404(Kebab , pk=pk)
+    kebab = get_object_or_404(Kebab, pk=pk)
     previous_kebab = Kebab.objects.filter(pk__lt=pk).order_by('-pk').first()
     next_kebab = Kebab.objects.filter(pk__gt=pk).order_by('pk').first()
     return render(request, 'kebab_detail.html', {'kebab': kebab, 'previous': previous_kebab, 'next': next_kebab})
+
+# Bulk Opening Hours
+@user_passes_test(lambda u: u.is_staff)
+def bulk_opening_hours(request):
+    if request.method == 'POST':
+        hours_data = request.POST.getlist('hours', [])
+        for entry in hours_data:
+            kebab = get_object_or_404(Kebab, id=entry.get('kebab_id'))
+            OpeningHour.objects.update_or_create(
+                kebab=kebab,
+                defaults={'hours': entry.get('hours')}
+            )
+        return JsonResponse({'status': 'success', 'message': 'Opening hours updated successfully'})
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+# Get Favorites
+@login_required
+def get_favorites(request):
+    favorites = request.user.favorite_set.all()
+    return render(request, 'favorites.html', {'favorites': favorites})

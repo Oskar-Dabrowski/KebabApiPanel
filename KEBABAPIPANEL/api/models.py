@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.timezone import now
+from django.core.exceptions import ValidationError
+
 
 class Kebab(models.Model):
     name = models.CharField(max_length=255)
@@ -32,28 +34,49 @@ class UserComment(models.Model):
 
 class OpeningHour(models.Model):
     kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name="opening_hours")
-    day_of_week = models.CharField(
-        max_length=10,
-        choices=[
-            ('monday', 'Monday'),
-            ('tuesday', 'Tuesday'),
-            ('wednesday', 'Wednesday'),
-            ('thursday', 'Thursday'),
-            ('friday', 'Friday'),
-            ('saturday', 'Saturday'),
-            ('sunday', 'Sunday'),
-        ]
+    hours = models.JSONField(
+        help_text=(
+            "JSON format: {'monday': {'open': '10:00', 'close': '20:00'}, "
+            "'tuesday': {'open': '10:00', 'close': '20:00'}, ...}"
+        )
     )
-    open_time = models.TimeField()
-    close_time = models.TimeField()
+
+    def clean(self):
+        import datetime
+
+        valid_days = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
+        if not isinstance(self.hours, dict):
+            raise ValidationError("Opening hours must be a JSON object.")
+        
+        for day, times in self.hours.items():
+            if day not in valid_days:
+                raise ValidationError(f"Invalid day: {day}")
+            if "open" not in times or "close" not in times:
+                raise ValidationError(f"Invalid format for {day}. Use {'open': ..., 'close': ...}.")
+            try:
+                datetime.datetime.strptime(times["open"], "%H:%M")
+                datetime.datetime.strptime(times["close"], "%H:%M")
+            except ValueError:
+                raise ValidationError(f"Invalid time format for {day}. Use HH:MM.")
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(default=now)
+
+    class Meta:
+        unique_together = ('user', 'kebab')
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     has_changed_password = models.BooleanField(default=False)
-    
+
     def __str__(self):
         return self.user.username
-    
+
+    def needs_password_change(self):
+        return not self.has_changed_password
+
 class Suggestion(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='suggestions')
     kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name='suggestions')
@@ -71,10 +94,10 @@ class Suggestion(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-class Favorite(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(default=now)
+    def mark_as_accepted(self):
+        self.status = 'Accepted'
+        self.save()
 
-    class Meta:
-        unique_together = ('user', 'kebab')
+    def mark_as_rejected(self):
+        self.status = 'Rejected'
+        self.save()

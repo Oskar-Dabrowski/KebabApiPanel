@@ -10,6 +10,9 @@ from .views import (
     AddFavoriteView,
     RemoveFavoriteView,
     AddUserCommentView,
+    GetKebabCommentsView,
+    GetFavoriteKebabsView,
+    BulkOpeningHoursView,
 )
 
 urlpatterns = [
@@ -26,9 +29,14 @@ urlpatterns = [
     path('suggestions/<int:pk>', SuggestionView.as_view(), name='suggestion_detail'),
     
     # Favorites-related endpoints
+    path('favorites', GetFavoriteKebabsView.as_view(), name='get_favorites'),
     path('kebabs/<int:id>/favorite', AddFavoriteView.as_view(), name='add_favorite'),
     path('kebabs/<int:id>/unfavorite', RemoveFavoriteView.as_view(), name='remove_favorite'),
-
+    
     # Comments-related endpoints
     path('kebabs/<int:id>/comment', AddUserCommentView.as_view(), name='add_user_comment'),
+    path('kebabs/<int:id>/comments', GetKebabCommentsView.as_view(), name='get_kebab_comments'),
+
+    # Bulk operation endpoints
+    path('opening_hours/bulk', BulkOpeningHoursView.as_view(), name='bulk_opening_hours'),
 ]
