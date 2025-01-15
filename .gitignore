@@ -60,3 +60,6 @@ KEBABAPIPANEL/db.sqlite3
 KEBABAPIPANEL/db.sqlite3
 KEBABAPIPANEL/db.sqlite3
 *.sqlite3
+KEBABAPIPANEL/celerybeat-schedule.bak
+KEBABAPIPANEL/celerybeat-schedule.dat
+KEBABAPIPANEL/celerybeat-schedule.dir

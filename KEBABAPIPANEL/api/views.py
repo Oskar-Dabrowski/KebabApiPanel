@@ -8,6 +8,8 @@ from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Kebab, Suggestion, Favorite, UserComment, OpeningHour
+from django.http import JsonResponse
+from .models import Kebab
 from .serializers import (
     KebabSerializer, SuggestionSerializer, UserCommentSerializer, OpeningHourSerializer
 )
@@ -141,3 +143,27 @@ class SuggestionListView(APIView):
         suggestions = Suggestion.objects.all()
         serializer = SuggestionSerializer(suggestions, many=True)
         return Response(serializer.data)
+
+def kebab_list_view(request):
+    """
+    API View to return kebab data filtered by Legnica.
+    """
+    kebabs = Kebab.objects.filter(
+        latitude__gte=51.1500, latitude__lte=51.2300,
+        longitude__gte=16.1200, longitude__lte=16.2500
+    )
+    
+    data = [
+        {
+            'name': kebab.name,
+            'latitude': kebab.latitude,
+            'longitude': kebab.longitude,
+            'meats': kebab.meats,
+            'sauces': kebab.sauces,
+            'status': kebab.status,
+            'google_rating': kebab.google_rating,
+            'pyszne_rating': kebab.pyszne_rating,
+        }
+        for kebab in kebabs
+    ]
+    return JsonResponse({'kebabs': data})
