@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from api.models import Kebab, Suggestion, OpeningHour
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
+import json
 
 # Home: Kebab List View
 def kebab_list_view(request):
@@ -71,8 +72,70 @@ def bulk_opening_hours(request):
         return JsonResponse({'status': 'success', 'message': 'Opening hours updated successfully'})
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
+@login_required
+def edit_hours(request, pk):
+    kebab = Kebab.objects.get(id=pk)
+    hours = kebab.opening_hours.all()
+    if request.method == 'POST':
+        if hours:
+            # Zapisz zmiany w godzinach
+            for hour in hours:
+                hours_data = json.loads(hour.hours)
+                for day, times in hours_data.items():
+                    open_time = request.POST.get(f'{day}_open')
+                    close_time = request.POST.get(f'{day}_close')
+                    if open_time and close_time:
+                        hours_data[day] = {
+                            'open': open_time,
+                            'close': close_time
+                        }
+                hour.hours = json.dumps(hours_data)
+                hour.save()
+        else:
+            # Dodaj nowe godziny
+            days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+            hours_data = {}
+            for day in days:
+                open_time = request.POST.get(f'{day}_open')
+                close_time = request.POST.get(f'{day}_close')
+                if open_time and close_time:
+                    hours_data[day] = {
+                        'open': open_time,
+                        'close': close_time
+                    }
+            new_hour = OpeningHour(
+                kebab=kebab,
+                hours=json.dumps(hours_data)
+            )
+            new_hour.save()
+        return redirect('kebab_list')
+    
+    return render(request, 'edit_hours.html', {'kebab': kebab, 'hours': hours})
+
 # Get Favorites
 @login_required
 def get_favorites(request):
     favorites = request.user.favorite_set.all()
     return render(request, 'favorites.html', {'favorites': favorites})
+
+def accept_suggestion(request, suggestion_id):
+    if request.method == 'POST':
+        try:
+            suggestion = Suggestion.objects.get(id=suggestion_id)
+            suggestion.status = 'Accepted'
+            suggestion.save()
+            return JsonResponse({'status': 'success', 'message': 'Suggestion accepted successfully!'})
+        except Suggestion.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Suggestion not found'}, status=404)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+def reject_suggestion(request, suggestion_id):
+    if request.method == 'POST':
+        try:
+            suggestion = Suggestion.objects.get(id=suggestion_id)
+            suggestion.status = 'Rejected'
+            suggestion.save()
+            return JsonResponse({'status': 'success', 'message': 'Suggestion rejected successfully!'})
+        except Suggestion.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Suggestion not found'}, status=404)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)

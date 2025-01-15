@@ -87,8 +87,13 @@
                 <td>{{ kebab.status }}</td>
                 <td>
                     {% for hour in kebab.opening_hours.all %}
-                        {{ hour.day_of_week }}: {{ hour.open_time }} - {{ hour.close_time }}<br>
+                        {% if hour.hours %}
+                            {% for day, times in hour.hours.items %}
+                                {{ day.capitalize }}: {{ times.open }} - {{ times.close }}<br>
+                            {% endfor %}
+                        {% endif %}
                     {% endfor %}
+                    <a href="{% url 'edit_hours' kebab.id %}"><i class="fas fa-edit"></i> Edit Hours</a>
                 </td>
                 <td>
                     <a href="{% url 'check_suggestions' %}"><i class="fas fa-comment"></i> Check Suggestions</a>

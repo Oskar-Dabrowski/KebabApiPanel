@@ -26,11 +26,18 @@ class Kebab(models.Model):
     pyszne_rating = models.FloatField(blank=True, null=True)
     last_updated = models.DateTimeField(default=now)
 
+    def __str__(self):
+        return self.name
+
+
 class UserComment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name="comments")
     text = models.TextField()
     created_at = models.DateTimeField(default=now)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.kebab.name}"
 
 class OpeningHour(models.Model):
     kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name="opening_hours")
@@ -40,6 +47,9 @@ class OpeningHour(models.Model):
             "'tuesday': {'open': '10:00', 'close': '20:00'}, ...}"
         )
     )
+
+    def __str__(self):
+        return f"{self.kebab.name} - {self.hours}"  # Display kebab name and hours
 
     def clean(self):
         import datetime
@@ -63,6 +73,9 @@ class Favorite(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=now)
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.kebab.name}"
 
     class Meta:
         unique_together = ('user', 'kebab')
@@ -93,6 +106,9 @@ class Suggestion(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.title} - {self.kebab.name}"
 
     def mark_as_accepted(self):
         self.status = 'Accepted'

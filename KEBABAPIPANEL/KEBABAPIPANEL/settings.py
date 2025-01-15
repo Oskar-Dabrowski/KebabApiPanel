@@ -134,7 +134,7 @@ REST_FRAMEWORK = {
     ),
 }
 
-LOGIN_REDIRECT_URL = '/panel/admin/password_change/'
+LOGIN_REDIRECT_URL = 'admin:password_change'
 
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', 'your-default-google-api-key')
 

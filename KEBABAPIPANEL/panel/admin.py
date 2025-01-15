@@ -1,78 +1,127 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse, HttpResponse
-from django.contrib.auth.decorators import user_passes_test, login_required
-from api.models import Kebab, Suggestion, OpeningHour
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib import admin
+from api.models import Kebab, OpeningHour, Suggestion, UserComment, UserProfile, Favorite
+from django.shortcuts import redirect
+from django.urls import reverse
 
-# Home: Kebab List View
-def kebab_list_view(request):
-    kebabs = Kebab.objects.all()
-    return render(request, 'kebab_list.html', {'kebabs': kebabs})
+@admin.register(Kebab)
+class KebabAdmin(admin.ModelAdmin):
+    list_display = ['name', 'status', 'google_rating', 'pyszne_rating', 'last_updated']
+    search_fields = ['name', 'status', 'description', 'contact', 'meats', 'sauces', 'craft_rating', 'in_chain', 'order_methods', 'location_details', 'google_rating', 'pyszne_rating', 'last_updated']
+    list_filter = ['name', 'status', 'description', 'contact', 'meats', 'sauces', 'craft_rating', 'in_chain', 'order_methods', 'location_details', 'google_rating', 'pyszne_rating', 'last_updated']
 
-# Login View
-def custom_login(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('kebab_list')  # Redirect to kebab list after login
-    else:
-        form = AuthenticationForm()
-    return render(request, 'login.html', {'form': form})
+@admin.register(OpeningHour)
+class OpeningHourAdmin(admin.ModelAdmin):
+    list_display = ['kebab_name', 'hours']
+    search_fields = ['kebab__name']
+    list_filter = ['kebab__name']
 
-# Check Suggestions
-@user_passes_test(lambda u: u.is_staff)
-def check_suggestions(request):
-    suggestions = Suggestion.objects.all()
-    return render(request, 'check_suggestions.html', {'suggestions': suggestions})
+    def kebab_name(self, obj):
+        return obj.kebab.name
+    kebab_name.short_description = 'Kebab'
+    kebab_name.admin_order_field = 'kebab__name'
 
-# Add Suggestion
-@login_required
-def add_suggestion(request):
-    if request.method == 'POST':
-        kebab_id = request.POST.get('kebab')
-        title = request.POST.get('title')
-        description = request.POST.get('description')
-        
-        kebab = get_object_or_404(Kebab, id=kebab_id)
-        
-        if not description:
-            return HttpResponse("Description is required", status=400)
-        
-        Suggestion.objects.create(user=request.user, kebab=kebab, title=title, description=description)
-        return redirect('check_suggestions')
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['hours'].widget.attrs['placeholder'] = "{'monday': {'open': '10:00', 'close': '20:00'}, 'tuesday': {'open': '10:00', 'close': '20:00'}, ...}"
+        return form
     
-    kebabs = Kebab.objects.all()
-    return render(request, 'add_suggestion.html', {'kebabs': kebabs})
+    def add_view(self, request, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['hours_template'] = "{'monday': {'open': '10:00', 'close': '20:00'}, 'tuesday': {'open': '10:00', 'close': '20:00'}, ...}"
+        return super().add_view(request, form_url, extra_context)
 
-# Kebab Detail View
-def kebab_detail(request, pk):
-    kebab = get_object_or_404(Kebab, pk=pk)
-    previous_kebab = Kebab.objects.filter(pk__lt=pk).order_by('-pk').first()
-    next_kebab = Kebab.objects.filter(pk__gt=pk).order_by('pk').first()
-    return render(request, 'kebab_detail.html', {'kebab': kebab, 'previous': previous_kebab, 'next': next_kebab})
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['hours_template'] = "{'monday': {'open': '10:00', 'close': '20:00'}, 'tuesday': {'open': '10:00', 'close': '20:00'}, ...}"
+        return super().change_view(request, object_id, form_url, extra_context)
 
-# Bulk Opening Hours
-@user_passes_test(lambda u: u.is_staff)
-def bulk_opening_hours(request):
-    if request.method == 'POST':
-        hours_data = request.POST.getlist('hours', [])
-        for entry in hours_data:
-            kebab = get_object_or_404(Kebab, id=entry.get('kebab_id'))
-            OpeningHour.objects.update_or_create(
-                kebab=kebab,
-                defaults={'hours': entry.get('hours')}
-            )
-        return JsonResponse({'status': 'success', 'message': 'Opening hours updated successfully'})
-    return JsonResponse({'error': 'Invalid request method'}, status=400)
+    def has_change_permission(self, request, obj=None):
+        if request.user.userprofile.has_changed_password == False:
+            return False
+        return super().has_change_permission(request, obj)
 
-# Get Favorites
-@login_required
-def get_favorites(request):
-    favorites = request.user.favorite_set.all()
-    return render(request, 'favorites.html', {'favorites': favorites})
+    def has_delete_permission(self, request, obj=None):
+        if request.user.userprofile.has_changed_password == False:
+            return False
+        return super().has_delete_permission(request, obj)
+
+    def has_view_permission(self, request, obj=None):
+        if request.user.userprofile.has_changed_password == False:
+            return False
+        return super().has_view_permission(request, obj)
+
+    def changelist_view(self, request, extra_context=None):
+        if request.user.userprofile.has_changed_password == False:
+            return redirect(reverse('admin:password_change'))
+        return super().changelist_view(request, extra_context)
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        if request.user.userprofile.has_changed_password == False:
+            return redirect(reverse('admin:password_change'))
+        return super().change_view(request, object_id, form_url, extra_context)
+
+    def add_view(self, request, form_url='', extra_context=None):
+        if request.user.userprofile.has_changed_password == False:
+            return redirect(reverse('admin:password_change'))
+        return super().add_view(request, form_url, extra_context)
+    
+    def response_change(self, request, obj):
+        if request.user.userprofile.has_changed_password == False:
+            request.user.userprofile.has_changed_password = True
+            request.user.userprofile.save()
+        return super().response_change(request, obj)
+
+    def response_add(self, request, obj, post_url_continue=None):
+        if request.user.userprofile.has_changed_password == False:
+            request.user.userprofile.has_changed_password = True
+            request.user.userprofile.save()
+        return super().response_add(request, obj, post_url_continue)
+    
+@admin.register(Suggestion)
+class SuggestionAdmin(admin.ModelAdmin):
+    list_display = ('title', 'user', 'kebab_name', 'status', 'created_at')
+    search_fields = ('title', 'user__username', 'kebab__name', 'status', 'created_at')
+    list_filter = ('user__username', 'kebab__name', 'status', 'created_at')
+
+    def kebab_name(self, obj):
+        return obj.kebab.name
+    kebab_name.short_description = 'Kebab'
+    kebab_name.admin_order_field = 'kebab__name'
+
+@admin.register(UserComment)
+class UserCommentAdmin(admin.ModelAdmin):
+    list_display = ('user_name', 'kebab_name', 'text', 'created_at')
+    search_fields = ('user__username', 'kebab__name', 'text', 'created_at')
+    list_filter = ('user', 'kebab', 'created_at')
+
+    def user_name(self, obj):
+        return obj.user.username
+    user_name.short_description = 'User'
+    user_name.admin_order_field = 'user__username'
+
+    def kebab_name(self, obj):
+        return obj.kebab.name
+    kebab_name.short_description = 'Kebab'
+    kebab_name.admin_order_field = 'kebab__name'
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'has_changed_password')
+    list_filter = ('has_changed_password',)
+    search_fields = ('user__username',)
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ('user_name', 'kebab_name', 'created_at')
+    search_fields = ('user__username', 'kebab__name', 'created_at')
+    list_filter = ('user', 'user__username', 'kebab__name', 'created_at')
+
+    def user_name(self, obj):
+        return obj.user.username
+    user_name.short_description = 'User'
+    user_name.admin_order_field = 'user__username'
+
+    def kebab_name(self, obj):
+        return obj.kebab.name
+    kebab_name.short_description = 'Kebab'
+    kebab_name.admin_order_field = 'kebab__name'

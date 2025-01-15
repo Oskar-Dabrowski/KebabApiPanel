@@ -60,8 +60,8 @@
 </head>
 <body>
     <div class="container">
-        <a href="/panel/admin/api" class="button">Admin Login</a>
         <a href="{% url 'kebab_list' %}" class="button">Back to Kebab List</a>
+        <a href="/panel/admin/api" class="button">Admin Login</a>
         <h1>{{ kebab.name }}</h1>
         <p>Status: {{ kebab.status }}</p>
         <p>Opis: {{ kebab.description }}</p>
