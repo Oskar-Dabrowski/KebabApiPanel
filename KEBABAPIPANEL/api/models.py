@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils.timezone import now
 from django.core.exceptions import ValidationError
+import json
 
 
 class Kebab(models.Model):
@@ -40,13 +41,28 @@ class UserComment(models.Model):
         return f"{self.user.username} - {self.kebab.name}"
 
 class OpeningHour(models.Model):
-    kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name="opening_hours")
-    hours = models.JSONField(
-        help_text=(
-            "JSON format: {'monday': {'open': '10:00', 'close': '20:00'}, "
-            "'tuesday': {'open': '10:00', 'close': '20:00'}, ...}"
-        )
-    )
+    kebab = models.ForeignKey('Kebab', on_delete=models.CASCADE)
+    hours = models.JSONField(default=dict)  # Użyj JSONField do przechowywania godzin
+
+    def clean(self):
+        # Walidacja formatu JSON
+        try:
+            parsed_hours = json.loads(self.hours)  # Załaduj JSON
+        except json.JSONDecodeError:
+            raise ValidationError("Hours must be valid JSON.")
+
+        # Walidacja struktury JSON
+        required_days = {'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'}
+        if set(parsed_hours.keys()) != required_days:
+            raise ValidationError("Hours must contain all days of the week.")
+
+        for day, schedule in parsed_hours.items():
+            if not isinstance(schedule, dict) or 'open' not in schedule or 'close' not in schedule:
+                raise ValidationError(f"Each day must have 'open' and 'close' times defined. Error in {day}.")
+            if schedule['open'] and schedule['close']:
+                # Sprawdź, czy format godzin jest poprawny (opcjonalnie)
+                if not isinstance(schedule['open'], str) or not isinstance(schedule['close'], str):
+                    raise ValidationError(f"'open' and 'close' must be strings for {day}.")
 
     def __str__(self):
         return f"{self.kebab.name} - {self.hours}"  # Display kebab name and hours

@@ -4,97 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Opening Hours</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .container {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        input, select {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
+            margin: 20px;
         }
         button {
+            padding: 10px 20px;
             background-color: #4CAF50;
             color: white;
-            padding: 10px;
             border: none;
-            border-radius: 4px;
             cursor: pointer;
-            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+            color: white;
+            border: none;
+            cursor: pointer;
         }
         button:hover {
             background-color: #45a049;
         }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Edit Opening Hours</h1>
-        <form method="POST">
-            {% csrf_token %}
-            {% if hours %}
-                {% for hour in hours %}
-                <div class="form-group">
-                    <label for="day_of_week_{{ hour.id }}">Day of Week:</label>
-                    <select name="day_of_week_{{ hour.id }}" required>
-                        <option value="Monday" {% if hour.day_of_week == "Monday" %}selected{% endif %}>Monday</option>
-                        <option value="Tuesday" {% if hour.day_of_week == "Tuesday" %}selected{% endif %}>Tuesday</option>
-                        <option value="Wednesday" {% if hour.day_of_week == "Wednesday" %}selected{% endif %}>Wednesday</option>
-                        <option value="Thursday" {% if hour.day_of_week == "Thursday" %}selected{% endif %}>Thursday</option>
-                        <option value="Friday" {% if hour.day_of_week == "Friday" %}selected{% endif %}>Friday</option>
-                        <option value="Saturday" {% if hour.day_of_week == "Saturday" %}selected{% endif %}>Saturday</option>
-                        <option value="Sunday" {% if hour.day_of_week == "Sunday" %}selected{% endif %}>Sunday</option>
-                    </select>
-                    <label for="open_time_{{ hour.id }}">Open Time:</label>
-                    <input type="time" name="open_time_{{ hour.id }}" value="{{ hour.open_time }}" required>
-                    <label for="close_time_{{ hour.id }}">Close Time:</label>
-                    <input type="time" name="close_time_{{ hour.id }}" value="{{ hour.close_time }}" required>
-                </div>
-                {% endfor %}
-            {% else %}
-                <h2>No opening hours found. Please add new hours.</h2>
-                <div class="form-group">
-                    <label for="day_of_week">Day of Week:</label>
-                    <select name="day_of_week" required>
-                        <option value="Monday">Monday</option>
-                        <option value="Tuesday">Tuesday</option>
-                        <option value="Wednesday">Wednesday</option>
-                        <option value="Thursday">Thursday</option>
-                        <option value="Friday">Friday</option>
-                        <option value="Saturday">Saturday</option>
-                        <option value="Sunday">Sunday</option>
-                    </select>
-                    <label for="open_time">Open Time:</label>
-                    <input type="time" name="open_time" required>
-                    <label for="close_time">Close Time:</label>
-                    <input type="time" name="close_time" required>
-                </div>
-            {% endif %}
-            <button type="submit">Save Changes</button>
-        </form>
-    </div>
+    <h1>Edit Opening Hours for {{ kebab.name }}</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <label for="hours">Opening Hours (JSON format):</label>
+        <textarea id="hours" name="hours">"{{ opening_hours|default:"{}" }}"</textarea>
+        <br><br>
+        <button type="submit">Save Hours</button>
+    </form>
 </body>
 </html>

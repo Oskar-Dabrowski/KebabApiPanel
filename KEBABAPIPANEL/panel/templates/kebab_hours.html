@@ -1,0 +1,6 @@
+<h1>Opening Hours</h1>
+<ul>
+    {% for day, times in hours.items %}
+    <li>{{ day|capfirst }}: {{ times.open }} - {{ times.close }}</li>
+    {% endfor %}
+</ul>

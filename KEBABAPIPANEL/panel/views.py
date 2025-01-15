@@ -72,45 +72,39 @@ def bulk_opening_hours(request):
         return JsonResponse({'status': 'success', 'message': 'Opening hours updated successfully'})
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
+def kebab_opening_hours(request, kebab_id):
+    opening_hours = get_object_or_404(OpeningHour, kebab_id=kebab_id)
+    hours = json.loads(opening_hours.hours)
+    return render(request, 'kebab_hours.html', {'hours': hours})
+
 @login_required
-def edit_hours(request, pk):
-    kebab = Kebab.objects.get(id=pk)
-    hours = kebab.opening_hours.all()
+def edit_hours(request, kebab_id):
+    kebab = get_object_or_404(Kebab, id=kebab_id)
+    opening_hours = kebab.openinghour_set.first()
+
+    # List of days
+    days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+
     if request.method == 'POST':
-        if hours:
-            # Zapisz zmiany w godzinach
-            for hour in hours:
-                hours_data = json.loads(hour.hours)
-                for day, times in hours_data.items():
-                    open_time = request.POST.get(f'{day}_open')
-                    close_time = request.POST.get(f'{day}_close')
-                    if open_time and close_time:
-                        hours_data[day] = {
-                            'open': open_time,
-                            'close': close_time
-                        }
-                hour.hours = json.dumps(hours_data)
-                hour.save()
-        else:
-            # Dodaj nowe godziny
-            days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-            hours_data = {}
-            for day in days:
-                open_time = request.POST.get(f'{day}_open')
-                close_time = request.POST.get(f'{day}_close')
-                if open_time and close_time:
-                    hours_data[day] = {
-                        'open': open_time,
-                        'close': close_time
-                    }
-            new_hour = OpeningHour(
-                kebab=kebab,
-                hours=json.dumps(hours_data)
-            )
-            new_hour.save()
-        return redirect('kebab_list')
-    
-    return render(request, 'edit_hours.html', {'kebab': kebab, 'hours': hours})
+        try:
+            new_hours = json.loads(request.POST.get('hours'))
+            opening_hours.hours = new_hours
+            opening_hours.save()
+            return redirect('kebab_list')  # Redirect to home page after saving
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    # Initialize opening_hours if None
+    if opening_hours is None:
+        opening_hours = {day: {"open": "", "close": ""} for day in days}
+    else:
+        opening_hours = opening_hours.hours
+
+    return render(request, 'edit_hours.html', {
+        'kebab': kebab,
+        'opening_hours': opening_hours,
+        'days': days,
+    })
 
 # Get Favorites
 @login_required

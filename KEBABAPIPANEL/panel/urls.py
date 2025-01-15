@@ -2,7 +2,6 @@ from django.urls import path
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from .views import kebab_list_view, kebab_detail, check_suggestions, add_suggestion, get_favorites, bulk_opening_hours, accept_suggestion, reject_suggestion, edit_hours
-
 # Namespace for app-specific URLs
 
 
@@ -32,5 +31,5 @@ urlpatterns = [
     # Favorites and bulk management
     path('favorites/', get_favorites, name='favorites'),
     path('opening_hours/bulk/', bulk_opening_hours, name='bulk_opening_hours'),
-    path('kebabs/<int:pk>/edit_hours/', edit_hours, name='edit_hours'),
+    path('kebabs/<int:kebab_id>/edit_hours/', edit_hours, name='edit_hours'),
 ]
