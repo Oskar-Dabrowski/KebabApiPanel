@@ -41,8 +41,16 @@ class UserComment(models.Model):
         return f"{self.user.username} - {self.kebab.name}"
 
 class OpeningHour(models.Model):
-    kebab = models.ForeignKey('Kebab', on_delete=models.CASCADE)
-    hours = models.JSONField(default=dict)  # Użyj JSONField do przechowywania godzin
+    kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name='openinghour_set')
+    hours = models.JSONField(default={
+        'monday': {'open': '00:00', 'close': '00:00'},
+        'tuesday': {'open': '00:00', 'close': '00:00'},
+        'wednesday': {'open': '00:00', 'close': '00:00'},
+        'thursday': {'open': '00:00', 'close': '00:00'},
+        'friday': {'open': '00:00', 'close': '00:00'},
+        'saturday': {'open': '00:00', 'close': '00:00'},
+        'sunday': {'open': '00:00', 'close': '00:00'}
+    })  # Użyj JSONField do przechowywania godzin
 
     def clean(self):
         # Walidacja formatu JSON
