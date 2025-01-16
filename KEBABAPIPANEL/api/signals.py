@@ -3,7 +3,7 @@ from django.dispatch import receiver
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import UserProfile
+from .models import UserProfile, Kebab, OpeningHour
 from django.db.models.signals import post_save
 
 @receiver(user_logged_in)
@@ -29,3 +29,18 @@ def password_changed_handler(sender, instance, **kwargs):
     if instance.userprofile.has_changed_password == False:
         instance.userprofile.has_changed_password = True
         instance.userprofile.save()
+
+DEFAULT_OPENING_HOURS = {
+    'monday': {'open': '00:00', 'close': '00:00'},
+    'tuesday': {'open': '00:00', 'close': '00:00'},
+    'wednesday': {'open': '00:00', 'close': '00:00'},
+    'thursday': {'open': '00:00', 'close': '00:00'},
+    'friday': {'open': '00:00', 'close': '00:00'},
+    'saturday': {'open': '00:00', 'close': '00:00'},
+    'sunday': {'open': '00:00', 'close': '00:00'}
+}
+
+@receiver(post_save, sender=Kebab)
+def create_opening_hours(sender, instance, created, **kwargs):
+    if created:
+        OpeningHour.objects.create(kebab=instance, hours=DEFAULT_OPENING_HOURS)

@@ -4,31 +4,31 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from django.contrib.auth.hashers import make_password  # Ensure this is imported
+from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from .models import Kebab, Suggestion, Favorite, UserComment, OpeningHour
+from django.http import JsonResponse
+from .serializers import (
+    KebabSerializer, SuggestionSerializer, UserCommentSerializer, OpeningHourSerializer
+)
 
-from .fetchers import GoogleRatingsFetcher
-from .models import Kebab, Suggestion, Favorite, UserComment
-from .serializers import KebabSerializer, SuggestionSerializer, UserCommentSerializer
-from rest_framework.pagination import PageNumberPagination
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
-
+# User Registration
 class RegisterUserView(APIView):
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
         if not email or not password:
             return Response({'error': 'Email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         if User.objects.filter(username=email).exists():
             return Response({'error': 'User already exists'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         user = User.objects.create(username=email, password=make_password(password))
         return Response({'status': 'success', 'message': 'User registered successfully'}, status=status.HTTP_201_CREATED)
 
 
+# User Login
 class LoginUserView(APIView):
     def post(self, request):
         email = request.data.get('email')
@@ -42,25 +42,14 @@ class LoginUserView(APIView):
                 'token': str(refresh.access_token),
                 'email': user.username
             }, status=status.HTTP_200_OK)
-        
+
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
+# Kebab List and Details
 class KebabListView(ListAPIView):
     queryset = Kebab.objects.all()
     serializer_class = KebabSerializer
-    pagination_class = PageNumberPagination
-    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['status', 'craft_rating', 'in_chain']
-    ordering_fields = ['name', 'latitude', 'longitude']
-
-    def get(self, request):
-        kebabs = Kebab.objects.all()
-        paginator = self.pagination_class()
-        result_page = paginator.paginate_queryset(kebabs, request)
-        serializer = KebabSerializer(result_page, many=True)
-        return paginator.get_paginated_response(serializer.data)
-
 
 
 class KebabDetailView(RetrieveAPIView):
@@ -68,20 +57,33 @@ class KebabDetailView(RetrieveAPIView):
     serializer_class = KebabSerializer
     lookup_field = 'id'
 
-    def get(self, request, id):
-        kebab = Kebab.objects.get(id=id)
-        serializer = KebabSerializer(kebab)
-        return Response(serializer.data)
 
+# Kebab Hours View
+class KebabHoursView(APIView):
+    def get(self, request):
+        kebabs = Kebab.objects.all()
+        kebab_hours = []
+        for kebab in kebabs:
+            opening_hours = kebab.openinghour_set.first()  # Get the first associated opening hours
+            if opening_hours:
+                hours = opening_hours.hours
+                kebab_hours.append({
+                    'name': kebab.name,
+                    'hours': hours
+                })
+        return Response(kebab_hours)
+
+
+# Favorite Management
 class GetFavoriteKebabsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         favorites = Favorite.objects.filter(user=request.user)
-        kebabs = [favorite.kebab for favorite in favorites]
-        serializer = KebabSerializer(kebabs, many=True)
-        return Response(serializer.data)
-    
+        data = [{'id': fav.kebab.id, 'name': fav.kebab.name} for fav in favorites]
+        return Response(data)
+
+
 class AddFavoriteView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -90,36 +92,56 @@ class AddFavoriteView(APIView):
         Favorite.objects.get_or_create(user=request.user, kebab=kebab)
         return Response({'status': 'success', 'message': 'Added to favorites'}, status=status.HTTP_201_CREATED)
 
+
 class RemoveFavoriteView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def delete(self, request, kebab_id):
-        kebab = Kebab.objects.get(id=kebab_id)
-        favorite = Favorite.objects.filter(user=request.user, kebab=kebab)
-        if favorite.exists():
-            favorite.delete()
-            return Response({'status': 'success', 'message': 'Kebab removed from favorites'}, status=status.HTTP_200_OK)
-        return Response({'error': 'Kebab not found in favorites'}, status=status.HTTP_404_NOT_FOUND)
+    def delete(self, request, id):
+        kebab = get_object_or_404(Kebab, id=id)
+        Favorite.objects.filter(user=request.user, kebab=kebab).delete()
+        return Response({'status': 'success', 'message': 'Removed from favorites'}, status=status.HTTP_200_OK)
 
+
+# Comments Management
 class AddUserCommentView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
-        kebab = Kebab.objects.get(id=id)
+        kebab = get_object_or_404(Kebab, id=id)
         text = request.data.get('text')
         if not text:
-            return Response({'error': 'Text is required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Comment text is required'}, status=status.HTTP_400_BAD_REQUEST)
         UserComment.objects.create(user=request.user, kebab=kebab, text=text)
         return Response({'status': 'success', 'message': 'Comment added'}, status=status.HTTP_201_CREATED)
 
-class GetUserCommentsView(APIView):
-    permission_classes = [IsAuthenticated]
 
+class GetKebabCommentsView(APIView):
     def get(self, request, id):
-        kebab = Kebab.objects.get(id=id)
+        kebab = get_object_or_404(Kebab, id=id)
         comments = UserComment.objects.filter(kebab=kebab)
         serializer = UserCommentSerializer(comments, many=True)
         return Response(serializer.data)
+
+
+# Bulk Opening Hours Management
+class BulkOpeningHoursView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        hours_data = request.data.get('hours', [])
+        for entry in hours_data:
+            kebab = get_object_or_404(Kebab, id=entry.get('kebab_id'))
+            OpeningHour.objects.update_or_create(
+                kebab=kebab,
+                defaults={'hours': entry.get('hours')}
+            )
+        return Response({'status': 'success', 'message': 'Opening hours updated successfully'}, status=status.HTTP_200_OK)
+
+
+# Suggestion Management
+class SuggestionListCreateView(ListCreateAPIView):
+    queryset = Suggestion.objects.all()
+    serializer_class = SuggestionSerializer
 
 
 class SuggestionView(APIView):
@@ -127,8 +149,8 @@ class SuggestionView(APIView):
         serializer = SuggestionSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SuggestionListView(APIView):
@@ -137,28 +159,26 @@ class SuggestionListView(APIView):
         serializer = SuggestionSerializer(suggestions, many=True)
         return Response(serializer.data)
 
-
-class SuggestionListCreateView(ListCreateAPIView):
-    queryset = Suggestion.objects.all()
-    serializer_class = SuggestionSerializer
-
-class GetKebabStatsView(APIView):
-
-    def get(self, request):
-        open_kebabs = Kebab.objects.filter(status='open').count()
-        closed_kebabs = Kebab.objects.filter(status='closed').count()
-        planned_kebabs = Kebab.objects.filter(status='planned').count()
-        return Response({
-            'open': open_kebabs,
-            'closed': closed_kebabs,
-            'planned': planned_kebabs
-        })
+def kebab_list_view(request):
+    """
+    API View to return kebab data filtered by Legnica.
+    """
+    kebabs = Kebab.objects.filter(
+        latitude__gte=51.1500, latitude__lte=51.2300,
+        longitude__gte=16.1200, longitude__lte=16.2500
+    )
     
-class GetKebabRatingView(APIView):
-
-    def get(self, request, id):
-        kebab = Kebab.objects.get(id=id)
-        rating = GoogleRatingsFetcher.fetch_google_rating(kebab.name)
-        if rating:
-            return Response({'rating': rating['rating']})
-        return Response({'error': 'Rating not found'}, status=status.HTTP_404_NOT_FOUND)
+    data = [
+        {
+            'name': kebab.name,
+            'latitude': kebab.latitude,
+            'longitude': kebab.longitude,
+            'meats': kebab.meats,
+            'sauces': kebab.sauces,
+            'status': kebab.status,
+            'google_rating': kebab.google_rating,
+            'pyszne_rating': kebab.pyszne_rating,
+        }
+        for kebab in kebabs
+    ]
+    return JsonResponse({'kebabs': data})

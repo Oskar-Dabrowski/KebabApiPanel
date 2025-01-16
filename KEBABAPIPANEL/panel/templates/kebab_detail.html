@@ -88,26 +88,23 @@
         <p>Ocena Pyszne.pl: {{ kebab.pyszne_rating }}</p>
         <p>Data ostatniej aktualizacji: {{ kebab.last_updated }}</p>
         
-       <!-- Favorites Section -->
-{% if user.is_authenticated %}
-{% if kebab in user.favorite_set.all %}
-    <a href="{% url 'remove_favorite' kebab.id %}" class="button" id="remove-from-favorite">Usuń z ulubionych</a>
-    <div id="remove-favorite-response"></div>
-{% else %}
-    <a href="{% url 'add_favorite' kebab.id %}" class="button" id="add-to-favorite">Dodaj do ulubionych</a>
-    <div id="favorite-response"></div>
-{% endif %}
-{% endif %}
+        <!-- Favorites Section -->
+        {% if user.is_authenticated %}
+            {% if is_favorite %}
+                <a href="{% url 'remove_favorite' kebab.id %}" class="button">Usuń z ulubionych</a>
+            {% else %}
+                <a href="{% url 'add_favorite' kebab.id %}" class="button">Dodaj do ulubionych</a>
+            {% endif %}
+        {% endif %}
         
         <!-- Comments Section -->
         <div class="comments">
             <h2>Komentarze</h2>
             {% if user.is_authenticated %}
-            <form method="post" action="{% url 'add_user_comment' kebab.id %}" id="comment -form">
+            <form method="post" action="{% url 'add_user_comment' kebab.id %}">
                 {% csrf_token %}
                 <textarea name="text" rows="4" cols="50" placeholder="Dodaj komentarz..."></textarea>
                 <button type="submit" class="button">Dodaj</button>
-                <div id="comment-response"></div>
             </form>
             {% endif %}
             <div>
@@ -129,63 +126,5 @@
             {% endif %}
         </div>
     </div>
-
-    <script>
-        // Dodanie powiadomienia z reakcją API do przycisku "Dodaj do ulubionych"
-        document.getElementById('add-to-favorite').addEventListener('click', function(event) {
-            event.preventDefault();
-            var url = '{% url 'add_favorite' kebab.id %}';
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('favorite-response').innerHTML = data.message;
-            })
-            .catch(error => console.error('Error:', error));
-        });
-
-// Dodanie powiadomienia z reakcją API do przycisku "Usuń z ulubionych"
-document.getElementById('remove-from-favorite').addEventListener('click', function(event) {
-    event.preventDefault();
-    var url = '{% url 'remove_favorite' kebab.id %}';
-    fetch(url, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('remove-favorite-response').innerHTML = data.message;
-    })
-    .catch(error => console.error('Error:', error));
-});
-
-        // Dodanie powiadomienia z reakcją API do dodawaniu komentarza
-        document.getElementById('comment-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            var url = '{% url 'add_user_comment' kebab.id %}';
-            var text = document.querySelector('textarea[name="text"]').value;
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({text: text})
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('comment-response').innerHTML = data.message;
-            })
-            .catch(error => console.error('Error:', error));
-        });
-    </script>
 </body>
 </html>

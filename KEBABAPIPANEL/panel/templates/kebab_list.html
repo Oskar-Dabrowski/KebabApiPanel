@@ -1,4 +1,3 @@
-<!-- kebab_list.html -->
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -50,7 +49,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            position: relative; /* Dodano, aby umożliwić pozycjonowanie przycisku */
+            position: relative; /* Allows positioning of admin button */
         }
         .admin-login {
             position: absolute;
@@ -63,7 +62,7 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
-            text-decoration: none; /* Usunięcie podkreślenia */
+            text-decoration: none;
         }
         .admin-login:hover {
             background-color: #45a049;
@@ -71,6 +70,7 @@
     </style>
 </head>
 <body>
+    {% load custom_filters %}
     <div class="container">
         <a href="/panel/admin/api" class="admin-login">Admin Login</a>
         <a href="{% url 'kebab_list' %}"><h1>Kebab List</h1></a>
@@ -86,9 +86,18 @@
                 <td><a href="{% url 'kebab_detail' kebab.id %}">{{ kebab.name }}</a></td>
                 <td>{{ kebab.status }}</td>
                 <td>
-                    {% for hour in kebab.opening_hours.all %}
-                        {{ hour.day_of_week }}: {{ hour.open_time }} - {{ hour.close_time }}<br>
+                    {% for hour in kebab_hours %}
+                        {% if hour.kebab_name == kebab.name %}
+                            {% if hour.hours %}
+                                {% for day, times in hour.hours.items %}
+                                    {{ day|title }}: {{ times.open }} - {{ times.close }}<br>
+                                {% endfor %}
+                            {% else %}
+                                No opening hours available
+                            {% endif %}
+                        {% endif %}
                     {% endfor %}
+                    <a href="{% url 'edit_hours' kebab.id %}"><i class="fas fa-edit"></i> Edit Hours</a>
                 </td>
                 <td>
                     <a href="{% url 'check_suggestions' %}"><i class="fas fa-comment"></i> Check Suggestions</a>

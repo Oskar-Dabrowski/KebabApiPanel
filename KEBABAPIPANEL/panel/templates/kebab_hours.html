@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kebab Hours</title>
+</head>
+<body>
+    <h1>Kebab Opening Hours</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Kebab Name</th>
+                <th>Opening Hours</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for kebab in kebab_hours %}
+            <tr>
+                <td>{{ kebab.kebab_name }}</td>
+                <td>
+                    {% for day, times in kebab.hours.items %}
+                        {{ day|title }}: {{ times.open }} - {{ times.close }}<br>
+                    {% endfor %}
+                     
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_spectacular',
     'rest_framework_simplejwt',
+    'django_celery_beat',
     'api',
     'panel',
 ]
@@ -134,13 +135,14 @@ REST_FRAMEWORK = {
     ),
 }
 
-LOGIN_REDIRECT_URL = '/panel/admin/password_change/'
+LOGIN_REDIRECT_URL = 'admin:password_change'
 
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', 'your-default-google-api-key')
 
 MEDIA_URL = '/media/'  # Public URL used to access uploaded files
 MEDIA_ROOT = BASE_DIR / 'media'  # Directory where files are stored
 
-
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 

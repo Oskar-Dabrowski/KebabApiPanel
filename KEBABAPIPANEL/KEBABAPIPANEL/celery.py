@@ -1,4 +1,8 @@
+import os
 from celery import Celery
+
+# DJANGO_SETTINGS_MODULE
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'KEBABAPIPANEL.settings')
 
 # Initialize the Celery app
 app = Celery('KEBABAPIPANEL')
@@ -23,12 +27,12 @@ def setup_periodic_tasks(sender, **kwargs):
         period=IntervalSchedule.DAYS,  # Interval set to one day
     )
 
-    # Create or update a periodic task for updating ratings
+    # Create or update a periodic task for updating kebab details
     PeriodicTask.objects.update_or_create(
         interval=schedule,
-        name='Update Ratings Daily',  # Task name displayed in Django Admin
-        task='api.tasks.update_ratings_task',  # Path to the task function
+        name='Update Kebab Details Daily',  # Task name displayed in Django Admin
+        task='api.tasks.update_kebab_details',  # Path to the task function
         defaults={
-            'description': 'Fetch ratings for each kebab from Google and Pyszne.pl',
+            'description': 'Automatyczna aktualizacja danych o kebabach z Legnicy',
         }
     )
