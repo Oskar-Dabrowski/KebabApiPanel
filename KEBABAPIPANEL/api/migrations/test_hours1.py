@@ -5,7 +5,12 @@ def set_hours(apps, schema_editor):
     Kebab = apps.get_model('api', 'Kebab')
     OpeningHour = apps.get_model('api', 'OpeningHour')
 
-    kebab = Kebab.objects.get(name='test')
+    # Create a test kebab if it doesn't exist
+    kebab, created = Kebab.objects.get_or_create(name='test', defaults={
+        'latitude': 51.2095,
+        'longitude': 16.1554,
+        'status': 'open'
+    })
 
     hours = {
         "monday": {"open": "19:00", "close": "22:00"},
@@ -25,7 +30,7 @@ def set_hours(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0001_initial'),
+        ('api', '0012_alter_openinghour_hours'),
     ]
 
     operations = [

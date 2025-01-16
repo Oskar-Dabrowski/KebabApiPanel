@@ -4,12 +4,12 @@ from .models import Kebab, UserComment, OpeningHour, Suggestion
 class UserCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserComment
-        fields = ['id', 'user', 'text', 'created_at']
+        fields = '__all__'
 
 class OpeningHourSerializer(serializers.ModelSerializer):
     class Meta:
         model = OpeningHour
-        fields = ['id', 'kebab', 'hours']
+        fields = '__all__'
 
     def validate_hours(self, value):
         from datetime import datetime
@@ -39,10 +39,7 @@ class KebabSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Kebab
-        fields = [
-            'id', 'title', 'location', 'latitude', 'longitude', 'status',
-            'comments', 'opening_hours', 'google_rating', 'pyszne_rating', 'social_links'
-        ]
+        fields = '__all__'
 
     def validate_social_links(self, value):
         """

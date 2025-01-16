@@ -9,6 +9,15 @@ class Kebab(models.Model):
     description = models.TextField()
     latitude = models.FloatField()
     longitude = models.FloatField()
+
+    def clean(self):
+        if self.latitude < -90 or self.latitude > 90:
+            raise ValidationError('Latitude must be between -90 and 90')
+        if self.longitude < -180 or self.longitude > 180:
+            raise ValidationError('Longitude must be between -180 and 180')
+        if self.status not in dict(self.STATUS_CHOICES):
+            raise ValidationError('Invalid status')
+
     contact = models.CharField(max_length=20, blank=True, null=True)
     meats = models.TextField(blank=True, null=True)
     sauces = models.TextField(blank=True, null=True)
@@ -22,8 +31,8 @@ class Kebab(models.Model):
     location_details = models.TextField(blank=True, null=True)
     social_links = models.JSONField(blank=True, null=True)
     logo = models.ImageField(upload_to='kebab_logos/', blank=True, null=True)
-    google_rating = models.FloatField(blank=True, null=True)
-    pyszne_rating = models.FloatField(blank=True, null=True)
+    google_rating = models.FloatField(default=0)
+    pyszne_rating = models.FloatField(default=0)
     last_updated = models.DateTimeField(default=now)
 
     def __str__(self):

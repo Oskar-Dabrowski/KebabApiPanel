@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='openinghour',
             name='hours',
-            field=models.JSONField(default=api.models.default_opening_hours),
+            field=models.JSONField(default=api.models.default_hours),
         ),
     ]
