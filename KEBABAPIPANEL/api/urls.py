@@ -1,4 +1,3 @@
-# api/urls.py
 from django.urls import path
 from .views import (
     RegisterUserView,
@@ -14,6 +13,7 @@ from .views import (
     GetFavoriteKebabsView,
     BulkOpeningHoursView,
     kebab_list_view,
+    KebabHoursView,  # Import the new view
 )
 
 urlpatterns = [
@@ -41,4 +41,7 @@ urlpatterns = [
 
     # Bulk operation endpoints
     path('opening_hours/bulk', BulkOpeningHoursView.as_view(), name='bulk_opening_hours'),
+
+    # New endpoint for kebab hours
+    path('kebab-hours/', KebabHoursView.as_view(), name='kebab-hours'),  # Add the new route
 ]

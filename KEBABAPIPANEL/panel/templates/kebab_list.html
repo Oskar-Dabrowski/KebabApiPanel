@@ -1,4 +1,3 @@
-<!-- kebab_list.html -->
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -71,6 +70,7 @@
     </style>
 </head>
 <body>
+    {% load custom_filters %}
     <div class="container">
         <a href="/panel/admin/api" class="admin-login">Admin Login</a>
         <a href="{% url 'kebab_list' %}"><h1>Kebab List</h1></a>
@@ -86,16 +86,19 @@
                 <td><a href="{% url 'kebab_detail' kebab.id %}">{{ kebab.name }}</a></td>
                 <td>{{ kebab.status }}</td>
                 <td>
-                    {% for hour in kebab.openinghour_set.all %}
-                        {% if hour.hours %}
-                            {% for day, times in hour.hours.items %}
-                                {{ day|capfirst }}: {{ times.open }} - {{ times.close }}<br>
-                            {% endfor %}
+                    {% for hour in kebab_hours %}
+                        {% if hour.kebab_name == kebab.name %}
+                            {% if hour.hours %}
+                                {% for day, times in hour.hours.items %}
+                                    {{ day|title }}: {{ times.open }} - {{ times.close }}<br>
+                                {% endfor %}
+                            {% else %}
+                                No opening hours available
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
                     <a href="{% url 'edit_hours' kebab.id %}"><i class="fas fa-edit"></i> Edit Hours</a>
                 </td>
-                
                 <td>
                     <a href="{% url 'check_suggestions' %}"><i class="fas fa-comment"></i> Check Suggestions</a>
                     <a href="{% url 'add_suggestion' %}"><i class="fas fa-plus"></i> Add Suggestion</a>

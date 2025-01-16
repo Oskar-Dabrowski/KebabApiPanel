@@ -4,7 +4,6 @@ from django.utils.timezone import now
 from django.core.exceptions import ValidationError
 import json
 
-
 class Kebab(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -30,7 +29,6 @@ class Kebab(models.Model):
     def __str__(self):
         return self.name
 
-
 class UserComment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name="comments")
@@ -40,9 +38,8 @@ class UserComment(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.kebab.name}"
 
-class OpeningHour(models.Model):
-    kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name='openinghour_set')
-    hours = models.JSONField(default={
+def default_hours():
+    return {
         'monday': {'open': '00:00', 'close': '00:00'},
         'tuesday': {'open': '00:00', 'close': '00:00'},
         'wednesday': {'open': '00:00', 'close': '00:00'},
@@ -50,48 +47,38 @@ class OpeningHour(models.Model):
         'friday': {'open': '00:00', 'close': '00:00'},
         'saturday': {'open': '00:00', 'close': '00:00'},
         'sunday': {'open': '00:00', 'close': '00:00'}
-    })  # Użyj JSONField do przechowywania godzin
+    }
+
+class OpeningHour(models.Model):
+    kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name='openinghour_set')
+    hours = models.JSONField(blank=True, null=True, default=default_hours)
+
+    def save(self, *args, **kwargs):
+        # Delete existing hours for the kebab before saving new ones
+        OpeningHour.objects.filter(kebab=self.kebab).delete()
+        super().save(*args, **kwargs)
 
     def clean(self):
-        # Walidacja formatu JSON
+    # Validation for empty or invalid times
         try:
-            parsed_hours = json.loads(self.hours)  # Załaduj JSON
-        except json.JSONDecodeError:
-            raise ValidationError("Hours must be valid JSON.")
+            json.dumps(self.hours)  # Load JSON
+        except TypeError:
+            raise ValidationError("Hours must be a valid JSON object")
 
-        # Walidacja struktury JSON
+        # Existing validation logic
         required_days = {'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'}
-        if set(parsed_hours.keys()) != required_days:
+        if set(self.hours.keys()) != required_days:
             raise ValidationError("Hours must contain all days of the week.")
 
-        for day, schedule in parsed_hours.items():
+        for day, schedule in self.hours.items():
             if not isinstance(schedule, dict) or 'open' not in schedule or 'close' not in schedule:
                 raise ValidationError(f"Each day must have 'open' and 'close' times defined. Error in {day}.")
             if schedule['open'] and schedule['close']:
-                # Sprawdź, czy format godzin jest poprawny (opcjonalnie)
                 if not isinstance(schedule['open'], str) or not isinstance(schedule['close'], str):
                     raise ValidationError(f"'open' and 'close' must be strings for {day}.")
 
     def __str__(self):
-        return f"{self.kebab.name} - {self.hours}"  # Display kebab name and hours
-
-    def clean(self):
-        import datetime
-
-        valid_days = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
-        if not isinstance(self.hours, dict):
-            raise ValidationError("Opening hours must be a JSON object.")
-        
-        for day, times in self.hours.items():
-            if day not in valid_days:
-                raise ValidationError(f"Invalid day: {day}")
-            if "open" not in times or "close" not in times:
-                raise ValidationError(f"Invalid format for {day}. Use {'open': ..., 'close': ...}.")
-            try:
-                datetime.datetime.strptime(times["open"], "%H:%M")
-                datetime.datetime.strptime(times["close"], "%H:%M")
-            except ValueError:
-                raise ValidationError(f"Invalid time format for {day}. Use HH:MM.")
+        return f"{self.kebab.name} - {self.hours}"
 
 class Favorite(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

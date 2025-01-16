@@ -1,9 +1,18 @@
 from django.urls import path
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from .views import kebab_list_view, kebab_detail, check_suggestions, add_suggestion, get_favorites, bulk_opening_hours, accept_suggestion, reject_suggestion, edit_hours
-# Namespace for app-specific URLs
-
+from .views import (
+    kebab_list_view,
+    kebab_detail,
+    check_suggestions,
+    add_suggestion,
+    get_favorites,
+    bulk_opening_hours,
+    accept_suggestion,
+    reject_suggestion,
+    edit_hours,
+    KebabHoursPanelView,  # Import the new view
+)
 
 urlpatterns = [
     # Home and kebab-related endpoints
@@ -32,4 +41,7 @@ urlpatterns = [
     path('favorites/', get_favorites, name='favorites'),
     path('opening_hours/bulk/', bulk_opening_hours, name='bulk_opening_hours'),
     path('kebabs/<int:kebab_id>/edit_hours/', edit_hours, name='edit_hours'),
+
+    # New endpoint for kebab hours
+    path('kebab-hours/', KebabHoursPanelView, name='kebab_hours'),  # Add the new route
 ]

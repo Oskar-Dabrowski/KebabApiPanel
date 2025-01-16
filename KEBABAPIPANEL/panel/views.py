@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import user_passes_test, login_required
@@ -5,11 +6,20 @@ from api.models import Kebab, Suggestion, OpeningHour
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 import json
+import requests  # Import requests for API calls
 
 # Home: Kebab List View
 def kebab_list_view(request):
     kebabs = Kebab.objects.all()
-    return render(request, 'kebab_list.html', {'kebabs': kebabs})
+    kebab_hours = []
+    for kebab in kebabs:
+        opening_hours = kebab.openinghour_set.first()  # Get the first associated opening hours
+        if opening_hours:
+            kebab_hours.append({
+                'kebab_name': kebab.name,
+                'hours': opening_hours.hours
+            })
+    return render(request, 'kebab_list.html', {'kebabs': kebabs, 'kebab_hours': kebab_hours})
 
 # Login View
 def custom_login(request):
@@ -25,6 +35,18 @@ def custom_login(request):
     else:
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
+
+# New view to display kebab hours
+def KebabHoursPanelView(request):
+    opening_hours = OpeningHour.objects.all()
+    kebab_hours = []
+    for hours in opening_hours:
+        if hours.hours:  # Check if hours are not None
+            kebab_hours.append({
+                'kebab_name': hours.kebab.name,
+                'hours': hours.hours
+            })
+    return render(request, 'kebab_hours.html', {'kebab_hours': kebab_hours})
 
 # Check Suggestions
 @user_passes_test(lambda u: u.is_staff)
@@ -72,11 +94,6 @@ def bulk_opening_hours(request):
         return JsonResponse({'status': 'success', 'message': 'Opening hours updated successfully'})
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-def kebab_opening_hours(request, kebab_id):
-    opening_hours = get_object_or_404(OpeningHour, kebab_id=kebab_id)
-    hours = json.loads(opening_hours.hours)
-    return render(request, 'kebab_hours.html', {'hours': hours})
-
 @login_required
 def edit_hours(request, kebab_id):
     kebab = get_object_or_404(Kebab, id=kebab_id)
@@ -87,8 +104,37 @@ def edit_hours(request, kebab_id):
 
     if request.method == 'POST':
         try:
-            new_hours = json.loads(request.POST.get('hours'))
-            opening_hours.hours = new_hours
+            new_hours = request.POST.get('hours')
+            # Check if the hours data is in the correct JSON format
+            try:
+                new_hours = json.loads(new_hours)
+            except json.JSONDecodeError as e:
+                return JsonResponse({'status': 'error', 'message': f'Invalid JSON format: {e}'}, status=400)
+
+            # Check if the hours data is a dictionary
+            if not isinstance(new_hours, dict):
+                return JsonResponse({'status': 'error', 'message': 'Invalid hours format'}, status=400)
+
+            # Check if the hours data contains all the required days
+            required_days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+            if set(new_hours.keys()) != set(required_days):
+                return JsonResponse({'status': 'error', 'message': 'Invalid hours format'}, status=400)
+
+            # Check if the hours data contains valid times
+            for day, times in new_hours.items():
+                if not isinstance(times, dict) or 'open' not in times or 'close' not in times:
+                    return JsonResponse({'status': 'error', 'message': 'Invalid hours format'}, status=400)
+                try:
+                    datetime.strptime(times['open'], '%H:%M')
+                    datetime.strptime(times['close'], '%H:%M')
+                except ValueError:
+                    return JsonResponse({'status': 'error', 'message': 'Invalid time format'}, status=400)
+
+            # If the hours data is valid, save it to the database
+            if opening_hours is None:
+                opening_hours = OpeningHour(kebab=kebab, hours=new_hours)
+            else:
+                opening_hours.hours = new_hours
             opening_hours.save()
             return redirect('kebab_list')  # Redirect to home page after saving
         except Exception as e:
@@ -98,11 +144,20 @@ def edit_hours(request, kebab_id):
     if opening_hours is None:
         opening_hours = {day: {"open": "", "close": ""} for day in days}
     else:
-        opening_hours = opening_hours.hours
+        try:
+            # Use the opening_hours.hours attribute directly
+            opening_hours = opening_hours.hours
+        except AttributeError:
+            # If the opening_hours object doesn't have a hours attribute, use a default value
+            opening_hours = {day: {"open": "00:00", "close": "00:00"} for day in days}
 
+    # Convert opening_hours to a string before passing it to the JSON editor
+    initialData = json.dumps(opening_hours)
+
+    # Render the template with the initial data
     return render(request, 'edit_hours.html', {
         'kebab': kebab,
-        'opening_hours': opening_hours,
+        'initialData': initialData,
         'days': days,
     })
 
@@ -132,4 +187,3 @@ def reject_suggestion(request, suggestion_id):
             return JsonResponse({'status': 'success', 'message': 'Suggestion rejected successfully!'})
         except Suggestion.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Suggestion not found'}, status=404)
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)

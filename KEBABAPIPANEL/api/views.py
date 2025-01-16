@@ -9,7 +9,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Kebab, Suggestion, Favorite, UserComment, OpeningHour
 from django.http import JsonResponse
-from .models import Kebab
 from .serializers import (
     KebabSerializer, SuggestionSerializer, UserCommentSerializer, OpeningHourSerializer
 )
@@ -57,6 +56,22 @@ class KebabDetailView(RetrieveAPIView):
     queryset = Kebab.objects.all()
     serializer_class = KebabSerializer
     lookup_field = 'id'
+
+
+# Kebab Hours View
+class KebabHoursView(APIView):
+    def get(self, request):
+        kebabs = Kebab.objects.all()
+        kebab_hours = []
+        for kebab in kebabs:
+            opening_hours = kebab.openinghour_set.first()  # Get the first associated opening hours
+            if opening_hours:
+                hours = opening_hours.hours
+                kebab_hours.append({
+                    'name': kebab.name,
+                    'hours': hours
+                })
+        return Response(kebab_hours)
 
 
 # Favorite Management
