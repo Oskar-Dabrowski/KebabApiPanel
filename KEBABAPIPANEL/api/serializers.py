@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Kebab, UserComment, OpeningHour, Suggestion
 
 class UserCommentSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.username')
     class Meta:
         model = UserComment
         fields = '__all__'
@@ -58,3 +59,8 @@ class SuggestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Suggestion
         fields = '__all__'
+
+class FeedbackSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255)
+    email = serializers.EmailField()
+    message = serializers.CharField(max_length=1000)

@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import (
+    FeedbackView,
     RegisterUserView,
     LoginUserView,
     KebabListView,
@@ -44,4 +45,5 @@ urlpatterns = [
 
     # New endpoint for kebab hours
     path('kebab-hours/', KebabHoursView.as_view(), name='kebab-hours'),  # Add the new route
+    path('feedback', FeedbackView.as_view(), name='feedback'),
 ]

@@ -10,7 +10,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Kebab, Suggestion, Favorite, UserComment, OpeningHour
 from django.http import JsonResponse
 from .serializers import (
-    KebabSerializer, SuggestionSerializer, UserCommentSerializer, OpeningHourSerializer
+    FeedbackSerializer, KebabSerializer, SuggestionSerializer, UserCommentSerializer, OpeningHourSerializer
 )
 
 # User Registration
@@ -182,3 +182,11 @@ def kebab_list_view(request):
         for kebab in kebabs
     ]
     return JsonResponse({'kebabs': data})
+
+class FeedbackView(APIView):
+    def post(self, request):
+        serializer = FeedbackSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Feedback added successfully'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

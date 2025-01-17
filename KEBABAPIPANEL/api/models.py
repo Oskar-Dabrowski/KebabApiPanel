@@ -21,10 +21,17 @@ class Kebab(models.Model):
     contact = models.CharField(max_length=20, blank=True, null=True)
     meats = models.TextField(blank=True, null=True)
     sauces = models.TextField(blank=True, null=True)
+
+    STATUS_CHOICES = [
+    ('open', 'Open'),
+    ('closed', 'Closed'),
+    ('planned', 'Planned')
+]
     status = models.CharField(
-        max_length=50,
-        choices=[('open', 'Open'), ('closed', 'Closed'), ('planned', 'Planned')]
-    )
+    max_length=50,
+    choices=STATUS_CHOICES
+)
+    
     craft_rating = models.BooleanField(default=False)
     in_chain = models.BooleanField(default=False)
     order_methods = models.TextField(blank=True, null=True)
@@ -34,6 +41,21 @@ class Kebab(models.Model):
     google_rating = models.FloatField(default=0)
     pyszne_rating = models.FloatField(default=0)
     last_updated = models.DateTimeField(default=now)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.openinghour_set.exists():
+            from api.models import OpeningHour
+            default_hours = {
+                "monday": {"open": "10:00", "close": "22:00"},
+                "tuesday": {"open": "10:00", "close": "22:00"},
+                "wednesday": {"open": "10:00", "close": "22:00"},
+                "thursday": {"open": "10:00", "close": "22:00"},
+                "friday": {"open": "10:00", "close": "23:00"},
+                "saturday": {"open": "10:00", "close": "23:00"},
+                "sunday": {"open": "10:00", "close": "20:00"}
+            }
+            OpeningHour.objects.create(kebab=self, hours=default_hours)
 
     def __str__(self):
         return self.name
@@ -49,18 +71,18 @@ class UserComment(models.Model):
 
 def default_hours():
     return {
-        'monday': {'open': '00:00', 'close': '00:00'},
-        'tuesday': {'open': '00:00', 'close': '00:00'},
-        'wednesday': {'open': '00:00', 'close': '00:00'},
-        'thursday': {'open': '00:00', 'close': '00:00'},
-        'friday': {'open': '00:00', 'close': '00:00'},
-        'saturday': {'open': '00:00', 'close': '00:00'},
-        'sunday': {'open': '00:00', 'close': '00:00'}
-    }
+    "monday": {"open": "10:00", "close": "22:00"},
+    "tuesday": {"open": "10:00", "close": "22:00"},
+    "wednesday": {"open": "10:00", "close": "22:00"},
+    "thursday": {"open": "10:00", "close": "22:00"},
+    "friday": {"open": "10:00", "close": "23:00"},
+    "saturday": {"open": "10:00", "close": "23:00"},
+    "sunday": {"open": "10:00", "close": "20:00"}
+}
 
 class OpeningHour(models.Model):
     kebab = models.ForeignKey(Kebab, on_delete=models.CASCADE, related_name='openinghour_set')
-    hours = models.JSONField(blank=True, null=True, default=default_hours)
+    hours = models.JSONField(blank=True, null=True, default=default_hours, verbose_name="Godziny otwarcia")
 
     def save(self, *args, **kwargs):
         # Delete existing hours for the kebab before saving new ones
