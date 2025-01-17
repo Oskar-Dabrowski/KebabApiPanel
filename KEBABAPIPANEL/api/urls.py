@@ -25,7 +25,7 @@ urlpatterns = [
     # Kebab-related endpoints
     path('kebabs', KebabListView.as_view(), name='kebab_list'),
     path('kebabs/<int:id>', KebabDetailView.as_view(), name='kebab_detail'),
-    path('api/kebabs/legnica', kebab_list_view, name='kebab_list_legnica'),
+    path('kebabs/legnica', kebab_list_view, name='kebab_list_legnica'),
 
     # Suggestion-related endpoints
     path('suggestions', SuggestionListView.as_view(), name='suggestion_list_create'),
