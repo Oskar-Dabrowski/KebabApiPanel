@@ -45,5 +45,5 @@ urlpatterns = [
 
     # New endpoint for kebab hours
     path('kebab-hours/', KebabHoursView.as_view(), name='kebab-hours'),  # Add the new route
-    path('feedback', FeedbackView.as_view(), name='feedback'),
+    path('suggestions-feedback', FeedbackView.as_view(), name='suggestions_feedback'),
 ]
