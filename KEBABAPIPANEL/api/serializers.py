@@ -64,3 +64,12 @@ class FeedbackSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255)
     email = serializers.EmailField()
     message = serializers.CharField(max_length=1000)
+
+    def create(self, validated_data):
+        # Create and save Feedback instance
+        from .models import Suggestion
+        return Suggestion.objects.create(
+            user=validated_data.get('user'),
+            title=validated_data.get('name'),
+            description=validated_data.get('message'),
+        )

@@ -80,7 +80,13 @@ class GetFavoriteKebabsView(APIView):
 
     def get(self, request):
         favorites = Favorite.objects.filter(user=request.user)
-        data = [{'id': fav.kebab.id, 'name': fav.kebab.name} for fav in favorites]
+        data = [
+            {
+                'id': fav.kebab.id,
+                'name': fav.kebab.name,
+                'is_favorite': True,
+            } for fav in favorites
+        ]
         return Response(data)
 
 
@@ -170,6 +176,7 @@ def kebab_list_view(request):
     
     data = [
         {
+            'id': kebab.id,  # Include the kebab ID in the response
             'name': kebab.name,
             'latitude': kebab.latitude,
             'longitude': kebab.longitude,
@@ -187,6 +194,6 @@ class FeedbackView(APIView):
     def post(self, request):
         serializer = FeedbackSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            feedback = serializer.save()
             return Response({'message': 'Feedback added successfully'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
