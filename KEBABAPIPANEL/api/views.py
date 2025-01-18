@@ -115,11 +115,11 @@ class AddUserCommentView(APIView):
     def post(self, request, id):
         kebab = get_object_or_404(Kebab, id=id)
         text = request.data.get('text')
-        if not text:
-            return Response({'error': 'Comment text is required'}, status=status.HTTP_400_BAD_REQUEST)
-        UserComment.objects.create(user=request.user, kebab=kebab, text=text)
-        return Response({'status': 'success', 'message': 'Comment added'}, status=status.HTTP_201_CREATED)
-
+        if text:
+            UserComment.objects.create(user=request.user, kebab=kebab, text=text)
+            return Response({'status': 'success', 'message': 'Comment added successfully'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'status': 'error', 'message': 'Comment text is required'}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetKebabCommentsView(APIView):
     def get(self, request, id):

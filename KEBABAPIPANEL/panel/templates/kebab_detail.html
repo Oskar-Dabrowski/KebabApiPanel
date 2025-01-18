@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,10 +13,12 @@
             margin: 0;
             padding: 20px;
         }
+
         h1 {
             text-align: center;
             color: #333;
         }
+
         .container {
             max-width: 800px;
             margin: auto;
@@ -24,6 +27,7 @@
             border-radius: 8px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
         }
+
         .button {
             display: inline-block;
             margin: 10px 0;
@@ -33,31 +37,38 @@
             text-decoration: none;
             border-radius: 4px;
         }
+
         .button:hover {
             background-color: #45a049;
         }
+
         .comments {
             margin-top: 20px;
         }
+
         .comment {
             margin-bottom: 10px;
             border-bottom: 1px solid #ddd;
             padding-bottom: 10px;
         }
+
         .pagination {
             margin-top: 20px;
             text-align: center;
         }
+
         .pagination a {
             text-decoration: none;
             color: #4CAF50;
             font-weight: bold;
         }
+
         .pagination a:hover {
             color: #45a049;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <a href="{% url 'kebab_list' %}" class="button">Back to Kebab List</a>
@@ -72,8 +83,10 @@
         <p>Sosy: {{ kebab.sauces }}</p>
         <p>Godziny otwarcia:</p>
         <ul>
-            {% for hour in kebab.opening_hours.all %}
-                <li>{{ hour.day_of_week }}: {{ hour.open_time }} - {{ hour.close_time }}</li>
+            {% for hour in kebab.openinghour_set.all %}
+                {% for day, times in hour.hours.items %}
+                    <li>{{ day|title }}: {{ times.open }} - {{ times.close }}</li>
+                {% endfor %}
             {% endfor %}
         </ul>
         <p>Ocena rzemieślnicza: {{ kebab.craft_rating }}</p>
@@ -87,25 +100,28 @@
         <p>Ocena Google: {{ kebab.google_rating }}</p>
         <p>Ocena Pyszne.pl: {{ kebab.pyszne_rating }}</p>
         <p>Data ostatniej aktualizacji: {{ kebab.last_updated }}</p>
-        
+
         <!-- Favorites Section -->
         {% if user.is_authenticated %}
-            {% if is_favorite %}
-                <a href="{% url 'remove_favorite' kebab.id %}" class="button">Usuń z ulubionych</a>
-            {% else %}
-                <a href="{% url 'add_favorite' kebab.id %}" class="button">Dodaj do ulubionych</a>
-            {% endif %}
+        {% if is_favorite %}
+        <a href="{% url 'remove_favorite' kebab.id %}" class="button">Usuń z ulubionych</a>
+        {% else %}
+        <a href="{% url 'add_favorite' kebab.id %}" class="button">Dodaj do ulubionych</a>
         {% endif %}
-        
+        {% endif %}
+
         <!-- Comments Section -->
         <div class="comments">
             <h2>Komentarze</h2>
             {% if user.is_authenticated %}
-            <form method="post" action="{% url 'add_user_comment' kebab.id %}">
+            <form id="comment-form" method="post" action="{% url 'add_user_comment' kebab.id %}">
                 {% csrf_token %}
                 <textarea name="text" rows="4" cols="50" placeholder="Dodaj komentarz..."></textarea>
                 <button type="submit" class="button">Dodaj</button>
+                <div id="comment-message"></div>
             </form>
+            {% else %}
+            <p>Zaloguj się, aby dodać komentarz.</p>
             {% endif %}
             <div>
                 {% for comment in kebab.comments.all %}
@@ -116,15 +132,44 @@
                 {% endfor %}
             </div>
         </div>
+        
+        <script>
+            $(document).ready(function() {
+                $('#comment-form').submit(function(event) {
+                    event.preventDefault();
+                    var form = $(this);
+                    var url = form.attr('action');
+                    var data = form.serialize();
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: data,
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                $('#comment-message').html('<p style="color: green;">' + response.message + '</p>');
+                                // Add the new comment to the list
+                                var newComment = '<div class="comment"><p><strong>' + '{{ request.user.username }}' + '</strong>: ' + $('textarea[name="text"]').val() + '</p><p><small>' + '{{ comment.created_at }}' + '</small></p></div>';
+                                $('.comments div:last-child').append(newComment);
+                                // Clear the textarea
+                                $('textarea[name="text"]').val('');
+                            } else {
+                                $('#comment-message').html('<p style="color: red;">' + response.message + '</p>');
+                            }
+                        }
+                    });
+                });
+            });
+        </script>
 
         <div class="pagination">
             {% if kebab.previous %}
-                <a href="{% url 'kebab_detail' kebab.previous.pk %}">Poprzedni</a>
+            <a href="{% url 'kebab_detail' kebab.previous.pk %}">Poprzedni</a>
             {% endif %}
             {% if kebab.next %}
-                <a href="{% url 'kebab_detail' kebab.next.pk %}">Następny</a>
+            <a href="{% url 'kebab_detail' kebab.next.pk %}">Następny</a>
             {% endif %}
         </div>
     </div>
 </body>
+
 </html>

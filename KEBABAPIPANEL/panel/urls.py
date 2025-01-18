@@ -2,6 +2,7 @@ from django.urls import path
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from .views import (
+    add_user_comment,
     kebab_list_view,
     kebab_detail,
     check_suggestions,
@@ -44,4 +45,6 @@ urlpatterns = [
 
     # New endpoint for kebab hours
     path('kebab-hours/', KebabHoursPanelView, name='kebab_hours'),  # Add the new route
+
+    path('kebabs/<int:kebab_id>/comment', add_user_comment, name='add_user_comment'),
 ]

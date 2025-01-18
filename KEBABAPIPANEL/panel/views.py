@@ -2,7 +2,7 @@ from datetime import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import user_passes_test, login_required
-from api.models import Kebab, Suggestion, OpeningHour
+from api.models import Kebab, Suggestion, OpeningHour, UserComment
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 import json
@@ -187,3 +187,15 @@ def reject_suggestion(request, suggestion_id):
             return JsonResponse({'status': 'success', 'message': 'Suggestion rejected successfully!'})
         except Suggestion.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Suggestion not found'}, status=404)
+
+@login_required
+def add_user_comment(request, kebab_id):
+    kebab = get_object_or_404(Kebab, id=kebab_id)
+    if request.method == 'POST':
+        text = request.POST.get('text')
+        if text:
+            UserComment.objects.create(user=request.user, kebab=kebab, text=text)
+            return redirect('kebab_detail', kebab.id)
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Comment text is required'}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
