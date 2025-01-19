@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import serializers
 from .models import Kebab, UserComment, OpeningHour, Suggestion
 
@@ -41,6 +42,11 @@ class KebabSerializer(serializers.ModelSerializer):
     class Meta:
         model = Kebab
         fields = '__all__'
+
+    def get_logo_url(self, obj):
+        if obj.logo:
+            return f"{settings.STATIC_URL}{obj.logo}"
+        return None
 
     def validate_social_links(self, value):
         """

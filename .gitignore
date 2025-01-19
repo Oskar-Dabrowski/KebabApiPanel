@@ -26,7 +26,6 @@ env/
 *.pem
 
 # Static and media files
-/static/
 media/
 
 # Byte-compiled / optimized / DLL files
