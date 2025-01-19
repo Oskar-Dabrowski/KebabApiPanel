@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-bj&+=kf-sehc4jfe28f#lrimveg(eac04b)f%y^k#v$336v@y='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['kebabapipanel-tg6o.onrender.com']
 
@@ -152,3 +152,8 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+CSRF_TRUSTED_ORIGINS = ['https://kebabapipanel-tg6o.onrender.com']
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://kebabapipanel-tg6o.onrender.com']

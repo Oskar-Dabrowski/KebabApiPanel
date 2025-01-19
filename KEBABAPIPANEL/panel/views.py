@@ -9,6 +9,7 @@ import json
 import requests  # Import requests for API calls
 
 # Home: Kebab List View
+@login_required(login_url='/panel/login')
 def kebab_list_view(request):
     kebabs = Kebab.objects.all()
     kebab_hours = []
@@ -37,6 +38,7 @@ def custom_login(request):
     return render(request, 'login.html', {'form': form})
 
 # New view to display kebab hours
+@login_required(login_url='/panel/login')
 def KebabHoursPanelView(request):
     opening_hours = OpeningHour.objects.all()
     kebab_hours = []
@@ -55,7 +57,7 @@ def check_suggestions(request):
     return render(request, 'check_suggestions.html', {'suggestions': suggestions})
 
 # Add Suggestion
-@login_required
+@login_required(login_url='/panel/login')
 def add_suggestion(request):
     if request.method == 'POST':
         kebab_id = request.POST.get('kebab')
@@ -74,6 +76,7 @@ def add_suggestion(request):
     return render(request, 'add_suggestion.html', {'kebabs': kebabs})
 
 # Kebab Detail View
+@login_required(login_url='/panel/login')
 def kebab_detail(request, pk):
     kebab = get_object_or_404(Kebab, pk=pk)
     previous_kebab = Kebab.objects.filter(pk__lt=pk).order_by('-pk').first()
@@ -94,7 +97,7 @@ def bulk_opening_hours(request):
         return JsonResponse({'status': 'success', 'message': 'Opening hours updated successfully'})
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-@login_required
+@login_required(login_url='/panel/login')
 def edit_hours(request, kebab_id):
     kebab = get_object_or_404(Kebab, id=kebab_id)
     opening_hours = kebab.openinghour_set.first()
@@ -162,7 +165,7 @@ def edit_hours(request, kebab_id):
     })
 
 # Get Favorites
-@login_required
+@login_required(login_url='/panel/login')
 def get_favorites(request):
     favorites = request.user.favorite_set.all()
     return render(request, 'favorites.html', {'favorites': favorites})
@@ -188,7 +191,7 @@ def reject_suggestion(request, suggestion_id):
         except Suggestion.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Suggestion not found'}, status=404)
 
-@login_required
+@login_required(login_url='/panel/login')
 def add_user_comment(request, kebab_id):
     kebab = get_object_or_404(Kebab, id=kebab_id)
     if request.method == 'POST':
