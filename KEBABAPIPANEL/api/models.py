@@ -18,6 +18,10 @@ class Kebab(models.Model):
         if self.status not in dict(self.STATUS_CHOICES):
             raise ValidationError('Invalid status')
 
+    # Walidacja lat otwarcia i zamknięcia
+        if self.opening_year and self.closing_year:
+            if self.opening_year > self.closing_year:
+                raise ValidationError('Opening year cannot be later than closing year.')
     contact = models.CharField(max_length=20, blank=True, null=True)
     meats = models.TextField(blank=True, null=True)
     sauces = models.TextField(blank=True, null=True)
