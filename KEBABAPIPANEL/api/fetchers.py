@@ -24,6 +24,7 @@ class GoogleRatingsFetcher:
                 "place_id": place_id
             }
         return None
+        
 
 class PyszneRatingsFetcher:
     @staticmethod
