@@ -35,15 +35,20 @@ class Kebab(models.Model):
     max_length=50,
     choices=STATUS_CHOICES
 )
-    
+    opening_year = models.IntegerField(blank=True, null=True)
+    closing_year = models.IntegerField(blank=True, null=True)
     craft_rating = models.BooleanField(default=False)
     in_chain = models.BooleanField(default=False)
     order_methods = models.TextField(blank=True, null=True)
     location_details = models.TextField(blank=True, null=True)
     social_links = models.JSONField(blank=True, null=True)
     logo = models.ImageField(upload_to='kebab_logos/', blank=True, null=True)
-    google_rating = models.FloatField(default=0)
-    pyszne_rating = models.FloatField(default=0)
+
+    contact = models.CharField(max_length=50, blank=True, null=True)
+    google_rating = models.FloatField(blank=True, null=True)
+    google_reviews_count = models.IntegerField(blank=True, null=True)
+    pyszne_rating = models.FloatField(blank=True, null=True)
+    pyszne_reviews_count = models.IntegerField(blank=True, null=True)
     last_updated = models.DateTimeField(default=now)
 
     def save(self, *args, **kwargs):
