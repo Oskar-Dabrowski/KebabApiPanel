@@ -64,12 +64,19 @@ class FeedbackSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255)
     email = serializers.EmailField()
     message = serializers.CharField(max_length=1000)
+    kebab_id = serializers.IntegerField(required=False)
 
     def create(self, validated_data):
-        # Create and save Feedback instance
-        from .models import Suggestion
+        kebab_id = validated_data.get('kebab_id')
+        kebab = None
+        if kebab_id:
+            kebab = Kebab.objects.filter(id=kebab_id).first()
+            if not kebab:
+                raise serializers.ValidationError({"kebab_id": "Invalid kebab ID."})
+
         return Suggestion.objects.create(
-            user=validated_data.get('user'),
+            user=self.context['request'].user,
+            kebab=kebab,
             title=validated_data.get('name'),
             description=validated_data.get('message'),
         )

@@ -192,8 +192,8 @@ def kebab_list_view(request):
 
 class FeedbackView(APIView):
     def post(self, request):
-        serializer = FeedbackSerializer(data=request.data)
+        serializer = FeedbackSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            feedback = serializer.save()
+            serializer.save()
             return Response({'message': 'Feedback added successfully'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
