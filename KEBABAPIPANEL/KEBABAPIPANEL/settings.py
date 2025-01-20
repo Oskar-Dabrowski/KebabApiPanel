@@ -26,7 +26,9 @@ SECRET_KEY = 'django-insecure-bj&+=kf-sehc4jfe28f#lrimveg(eac04b)f%y^k#v$336v@y=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['kebabapipanel-tg6o.onrender.com']
+ALLOWED_HOSTS = ['kebabapipanel-tg6o.onrender.com',
+                 'localhost',
+                 ]
 
 
 # Application definition
