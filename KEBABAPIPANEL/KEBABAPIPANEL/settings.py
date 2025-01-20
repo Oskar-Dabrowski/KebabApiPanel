@@ -54,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'KEBABAPIPANEL.urls'
@@ -128,15 +129,9 @@ STATIC_URL = '/static/'
 # Define the directory for collectstatic to gather static files for production
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_collected')
 
-# Directories to search for additional static files during development
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "KEBABAPIPANEL", "staticfiles"),
-]
-
-# Enable the WhiteNoise storage backend for production
-if not DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
+STATICFILES_DIRS = [ BASE_DIR / 'static', ]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -153,8 +148,8 @@ LOGIN_REDIRECT_URL = 'admin:password_change'
 
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', 'your-default-google-api-key')
 
-MEDIA_URL = '/media/'  # Public URL used to access uploaded files
-MEDIA_ROOT = BASE_DIR / 'media'  # Directory where files are stored
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True

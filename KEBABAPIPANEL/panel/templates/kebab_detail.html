@@ -81,6 +81,8 @@
         <p>Kontakt: {{ kebab.contact }}</p>
         <p>Mięso: {{ kebab.meats }}</p>
         <p>Sosy: {{ kebab.sauces }}</p>
+        <p>Rok otwarcia: {{ kebab.opening_year }}</p>
+        <p>Rok zamknięcia: {{ kebab.closing_year }}</p>
         <p>Godziny otwarcia:</p>
         <ul>
             {% for hour in kebab.openinghour_set.all %}
