@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/documentation/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
+urlpatterns.extend(static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT))
 
 # Serve media files during development
 if settings.DEBUG:
