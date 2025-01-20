@@ -49,6 +49,7 @@ class Kebab(models.Model):
     google_reviews_count = models.IntegerField(blank=True, null=True)
     pyszne_rating = models.FloatField(blank=True, null=True)
     pyszne_reviews_count = models.IntegerField(blank=True, null=True)
+    pyszne_url = models.URLField(blank=True, null=True)
     last_updated = models.DateTimeField(default=now)
 
     def save(self, *args, **kwargs):

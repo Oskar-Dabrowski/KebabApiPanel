@@ -15,9 +15,10 @@ def update_kebab_details():
             google_data = GoogleRatingsFetcher.fetch_google_rating(kebab.name)
             if google_data:
                 kebab.google_rating = google_data.get('rating')
+                kebab.logo = google_data.get('logo_url') or None
 
             # Fetch and update Pyszne ratings
-            pyszne_data = PyszneRatingsFetcher.fetch_pyszne_rating(kebab.name)
+            pyszne_data = PyszneRatingsFetcher.fetch_pyszne_details(kebab.pyszne_url)
             if pyszne_data:
                 kebab.pyszne_rating = pyszne_data.get('rating')
 
@@ -33,5 +34,3 @@ def update_kebab_details():
     # Log kebabs missing social media links
     if incomplete_social_links:
         print(f"Kebabs without social media links: {incomplete_social_links}")
-
-

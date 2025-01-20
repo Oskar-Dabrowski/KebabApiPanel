@@ -1,121 +1,72 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
-from api.models import Kebab, OpeningHour, Suggestion
+from api.models import Kebab, UserComment, Favorite, OpeningHour
 
-
-class KebabModelTest(TestCase):
+class ModelsTestCase(TestCase):
     def setUp(self):
+        # Tworzenie danych testowych
+        self.user = User.objects.create_user(username="testuser", password="password")
         self.kebab = Kebab.objects.create(
-            name="Testowy Kebab",
-            description="Delicious kebab description.",
-            latitude=51.2095,
-            longitude=16.1554,
-            contact="123-456-789",
-            meats="Chicken, Lamb",
-            sauces="Garlic, Spicy",
+            name="Test Kebab",
+            description="Delicious kebab",
+            latitude=51.1,
+            longitude=16.2,
             status="open",
-            social_links={"facebook": "http://facebook.com/testkebab"},
-            google_rating=4.5,
-            pyszne_rating=4.2
-        )
-
-    def test_kebab_creation(self):
-        """Test creating a Kebab object."""
-        self.assertEqual(self.kebab.name, "Testowy Kebab")
-        self.assertEqual(self.kebab.status, "open")
-
-    def test_kebab_str_method(self):
-        """Test the __str__ method of the Kebab model."""
-        self.assertEqual(str(self.kebab), "Testowy Kebab")
-
-    def test_kebab_geolocation(self):
-        """Test the geolocation attributes of a Kebab."""
-        self.assertEqual(self.kebab.latitude, 51.2095)
-        self.assertEqual(self.kebab.longitude, 16.1554)
-
-    def test_kebab_optional_fields(self):
-        """Test optional fields like description, meats, sauces, and social_links."""
-        self.assertEqual(self.kebab.description, "Delicious kebab description.")
-        self.assertEqual(self.kebab.contact, "123-456-789")
-        self.assertEqual(self.kebab.meats, "Chicken, Lamb")
-        self.assertEqual(self.kebab.sauces, "Garlic, Spicy")
-        self.assertEqual(self.kebab.social_links, {"facebook": "http://facebook.com/testkebab"})
-        self.assertEqual(self.kebab.google_rating, 4.5)
-        self.assertEqual(self.kebab.pyszne_rating, 4.2)
-
-
-class SuggestionModelTest(TestCase):
-    def setUp(self):
-        self.user = User.objects.create(username="testuser")
-        self.kebab = Kebab.objects.create(
-            name="Testowy Kebab",
-            latitude=51.2095,
-            longitude=16.1554
-        )
-        self.suggestion = Suggestion.objects.create(
-            user=self.user,
-            kebab=self.kebab,
-            title="Propozycja",
-            description="Opis propozycji"
-        )
-
-    def test_suggestion_creation(self):
-        """Test creating a Suggestion object."""
-        self.assertEqual(self.suggestion.status, "Pending")
-
-    def test_mark_as_accepted(self):
-        """Test marking a suggestion as accepted."""
-        self.suggestion.mark_as_accepted()
-        self.assertEqual(self.suggestion.status, "Accepted")
-
-    def test_mark_as_rejected(self):
-        """Test marking a suggestion as rejected."""
-        self.suggestion.mark_as_rejected()
-        self.assertEqual(self.suggestion.status, "Rejected")
-
-    def test_suggestion_str_method(self):
-        """Test the __str__ method of the Suggestion model."""
-        self.assertEqual(str(self.suggestion), "Propozycja - Testowy Kebab")
-
-
-class OpeningHourModelTest(TestCase):
-    def setUp(self):
-        self.kebab = Kebab.objects.create(
-            name="Testowy Kebab",
-            latitude=51.2095,
-            longitude=16.1554
+            opening_year=2000,
+            closing_year=2020
         )
         self.opening_hour = OpeningHour.objects.create(
             kebab=self.kebab,
             hours={
-                "monday": {"open": "10:00", "close": "22:00"},
-                "tuesday": {"open": "10:00", "close": "22:00"},
-                "wednesday": {"open": "10:00", "close": "22:00"},
-                "thursday": {"open": "10:00", "close": "22:00"},
-                "friday": {"open": "10:00", "close": "22:00"},
-                "saturday": {"open": "10:00", "close": "22:00"},
-                "sunday": {"open": "10:00", "close": "22:00"}
+                "monday": {"open": "09:00", "close": "21:00"},
+                "tuesday": {"open": "09:00", "close": "21:00"}
             }
         )
 
-    def test_opening_hour_creation(self):
-        """Test creating an OpeningHour object."""
-        self.assertEqual(self.opening_hour.hours["monday"]["open"], "10:00")
-        self.assertEqual(self.opening_hour.hours["monday"]["close"], "22:00")
+    def test_create_kebab(self):
+        # Sprawdza, czy obiekt Kebab został poprawnie utworzony
+        self.assertEqual(str(self.kebab), "Test Kebab")
+        self.assertEqual(self.kebab.status, "open")
 
-    def test_opening_hour_str_method(self):
-        """Test the __str__ method of the OpeningHour model."""
-        expected_start = "Testowy Kebab - {'monday': {'open': '10:00', 'close': '22:00'}, 'tuesday': {'open': '10:00', 'close': '22:00'}, ..."
-        self.assertTrue(str(self.opening_hour).startswith(expected_start))
-    def test_opening_hour_validation(self):
-        """Test the clean() method for validating hours JSON structure."""
-        invalid_hours = {
-            "monday": {"open": "10:00"},  # Missing 'close'
-            "tuesday": {},  # Missing 'open' and 'close'
-            "wednesday": "invalid",  # Invalid type
-        }
-        self.opening_hour.hours = invalid_hours
-        with self.assertRaises(ValidationError):
-            self.opening_hour.clean()
+    def test_kebab_latitude_validation(self):
+        # Walidacja błędnych współrzędnych latitude
+        kebab = Kebab(name="Invalid Kebab", latitude=100.0, longitude=16.2)
+        with self.assertRaises(Exception):
+            kebab.full_clean()  # Wymuszenie walidacji
 
+    def test_kebab_longitude_validation(self):
+        # Walidacja błędnych współrzędnych longitude
+        kebab = Kebab(name="Invalid Kebab", latitude=51.1, longitude=200.0)
+        with self.assertRaises(Exception):
+            kebab.full_clean()  # Wymuszenie walidacji
+
+
+    def test_kebab_opening_closing_year(self):
+        # Sprawdza poprawność lat otwarcia i zamknięcia
+        self.kebab.closing_year = 1990
+        with self.assertRaises(Exception):
+            self.kebab.full_clean()
+
+    def test_create_user_comment(self):
+        # Tworzenie komentarza użytkownika
+        comment = UserComment.objects.create(user=self.user, kebab=self.kebab, text="Great!")
+        self.assertEqual(str(comment), "testuser - Test Kebab")
+        self.assertEqual(comment.text, "Great!")
+
+    def test_create_favorite(self):
+        # Tworzenie ulubionego kebaba
+        favorite = Favorite.objects.create(user=self.user, kebab=self.kebab)
+        self.assertEqual(str(favorite), "testuser - Test Kebab")
+        self.assertEqual(favorite.user, self.user)
+        self.assertEqual(favorite.kebab, self.kebab)
+
+    def test_opening_hours(self):
+        # Sprawdza poprawność modelu OpeningHour
+        self.assertEqual(str(self.opening_hour), "Test Kebab - {'monday': {'open': '09:00', 'close': '21:00'}, 'tuesday': {'open': '09:00', 'close': '21:00'}}")
+        self.assertIn("monday", self.opening_hour.hours)
+
+    def test_unique_favorite_constraint(self):
+        # Sprawdza ograniczenie unikalności w modelu Favorite
+        Favorite.objects.create(user=self.user, kebab=self.kebab)
+        with self.assertRaises(Exception):
+            Favorite.objects.create(user=self.user, kebab=self.kebab)
