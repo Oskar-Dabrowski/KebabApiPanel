@@ -31,5 +31,4 @@ COPY . .
 # Eksportujemy port dla Django
 EXPOSE 8000
 
-# Migracje, tworzenie superużytkownika i uruchomienie serwera Django
-CMD ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py migrate && python manage.py shell < create_superuser.py && gunicorn KEBABAPIPANEL.wsgi:application --bind 0.0.0.0:8000"]
+CMD ["sh", "-c", "python manage.py migrate && python manage.py shell < create_superuser.py && python manage.py runserver 0.0.0.0:8000"]
