@@ -14,12 +14,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path, include
+from django.urls import path, include, re_path
 from api import views
 from panel import views
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from django.conf import settings
-from django.conf.urls.static import static
+from django.conf.urls.static import static, serve
 
 urlpatterns = [
     path('api/', include('api.urls')),
@@ -28,8 +28,9 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),  # Plik OpenAPI JSON
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/documentation/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 ]
-urlpatterns.extend(static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT))
+
 
 # Serve media files during development
 if settings.DEBUG:
