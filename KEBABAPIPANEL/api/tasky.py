@@ -5,18 +5,33 @@ from .fetchers import GoogleRatingsFetcher, PyszneRatingsFetcher
 @shared_task
 def update_kebab_details():
     """
-    Pobiera i aktualizuje dane kebabów.
+    Updates kebab ratings and verifies social media links.
     """
+    incomplete_social_links = []  # List of kebabs missing social media links
+
     for kebab in Kebab.objects.all():
         try:
+            # Fetch and update Google ratings
             google_data = GoogleRatingsFetcher.fetch_google_rating(kebab.name)
             if google_data:
-                kebab.google_rating = google_data['rating']
+                kebab.google_rating = google_data.get('rating')
 
+            # Fetch and update Pyszne ratings
             pyszne_data = PyszneRatingsFetcher.fetch_pyszne_rating(kebab.name)
             if pyszne_data:
-                kebab.pyszne_rating = pyszne_data['rating']
+                kebab.pyszne_rating = pyszne_data.get('rating')
+
+            # Check if social media links are present
+            if not kebab.social_links or not isinstance(kebab.social_links, dict):
+                incomplete_social_links.append(kebab.name)
 
             kebab.save()
+
         except Exception as e:
             print(f"Error updating {kebab.name}: {e}")
+
+    # Log kebabs missing social media links
+    if incomplete_social_links:
+        print(f"Kebabs without social media links: {incomplete_social_links}")
+
+

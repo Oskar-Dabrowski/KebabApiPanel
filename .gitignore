@@ -62,3 +62,9 @@ KEBABAPIPANEL/db.sqlite3
 KEBABAPIPANEL/celerybeat-schedule.bak
 KEBABAPIPANEL/celerybeat-schedule.dat
 KEBABAPIPANEL/celerybeat-schedule.dir
+
+# Selenium WebDriver logs
+chromedriver.log
+
+# Ignore staticfiles_collected folder
+KEBABAPIPANEL/staticfiles_collected/
