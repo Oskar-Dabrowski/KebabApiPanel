@@ -42,7 +42,7 @@ class Kebab(models.Model):
     order_methods = models.TextField(blank=True, null=True)
     location_details = models.TextField(blank=True, null=True)
     social_links = models.JSONField(blank=True, null=True)
-    logo = models.ImageField(upload_to='kebab_logos/', blank=True, null=True)
+    logo = models.ImageField(blank=True, null=True)
 
     contact = models.CharField(max_length=50, blank=True, null=True)
     google_rating = models.FloatField(blank=True, null=True)
